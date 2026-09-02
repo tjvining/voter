@@ -512,14 +512,14 @@
 
   function copyText(text){
     if (navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(function(){ toast("Link copied!"); }, function(){ fallbackCopy(text); });
+      navigator.clipboard.writeText(text).then(function(){ toast("Copied!"); }, function(){ fallbackCopy(text); });
     } else fallbackCopy(text);
   }
   function fallbackCopy(text){
     var ta=document.createElement("textarea");
     ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
     document.body.appendChild(ta); ta.select();
-    try{ document.execCommand("copy"); toast("Link copied!"); }catch(e){ toast("Copy failed — long-press the link"); }
+    try{ document.execCommand("copy"); toast("Copied!"); }catch(e){ toast("Copy failed — long-press the link"); }
     document.body.removeChild(ta);
   }
   function hostKeyFor(pollId){ try{ return localStorage.getItem("voter_host_"+pollId); }catch(e){ return null; } }
@@ -570,6 +570,9 @@
 
   function goHome(){ location.hash = "#/"; }
   function pollUrl(pollId){ return location.origin + "/#/poll/" + pollId; }
+  function pollShareText(pollId, pollName){
+    return "Vote in my " + (pollName || "poll") + " poll! 🗳️\n" + pollUrl(pollId);
+  }
   function brandHtml(){
     return '<div class="brand" onclick="Voter.home()">' +
       '<div class="logo">🗳️</div>' +
@@ -866,7 +869,7 @@
     reopenPoll: function(pollId){
       db.ref(NS+"/polls/"+pollId+"/status").set("open");
     },
-    copyLink: function(pollId){ copyText(pollUrl(pollId)); },
+    copyLink: function(pollId){ copyText(pollShareText(pollId, currentPoll && currentPoll.name)); },
     toggleVoterList: function(){ pageState.showVoters = !pageState.showVoters; renderPollPage.current && renderPollPage.current(); }
   };
 
