@@ -126,15 +126,16 @@
   .switch{position:relative;width:44px;height:26px;flex-shrink:0;}
   .switch input{opacity:0;width:0;height:0;position:absolute;}
   .switch .track{
-    position:absolute;inset:0;background:var(--surface-2);border:1px solid var(--border);
-    border-radius:20px;transition:.2s;
+    position:absolute;inset:0;background:var(--surface-2);border:1.5px solid var(--border);
+    border-radius:20px;transition:.2s;cursor:pointer;
   }
+  .switch .track:hover{border-color:#8b5cf680;}
   .switch .knob{
     position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;
-    background:var(--text-faint);transition:.2s;
+    background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.35);
   }
   .switch input:checked + .track{background:linear-gradient(135deg,var(--accent),var(--accent-2));border-color:transparent;}
-  .switch input:checked + .track .knob{transform:translateX(18px);background:#fff;}
+  .switch input:checked + .track .knob{transform:translateX(18px);}
 
   .duration-row{display:flex;gap:8px;margin-top:12px;}
   .duration-row .input{flex:1;}
@@ -406,6 +407,14 @@
     var n = String(name||"").trim().toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"");
     return n || ("guest_" + Math.random().toString(36).slice(2,8));
   }
+  function uniqueName(base, votes){
+    var n = 2, candidate;
+    do {
+      candidate = base + " " + n;
+      n++;
+    } while (atIdx(votes, normalizeName(candidate)));
+    return candidate;
+  }
   function atIdx(collection, idx){
     if (collection == null) return undefined;
     if (Array.isArray(collection)) return collection[idx];
@@ -485,7 +494,8 @@
     multi:   { icon:"☑︎", label:"Multiple Choice", desc:"Pick any" },
     ranked:  { icon:"🥇", label:"Ranked Choice", desc:"Order all options" },
     tinder:  { icon:"⇄", label:"Swipe Yes/No", desc:"Card by card" },
-    rating:  { icon:"⭐", label:"Star Rating", desc:"Rate each 1–5" }
+    rating:  { icon:"⭐", label:"Star Rating", desc:"Rate each 1–5" },
+    bracket: { icon:"⚔️", label:"Bracket", desc:"Head-to-head rounds" }
   };
   var UNIT_MS = { minutes:60000, hours:3600000, days:86400000 };
 
@@ -507,6 +517,7 @@
   window.addEventListener("hashchange", route);
 
   function goHome(){ location.hash = "#/"; }
+  function pollUrl(pollId){ return location.origin + "/#/poll/" + pollId; }
   function brandHtml(){
     return '<div class="brand" onclick="Voter.home()">' +
       '<div class="logo">🗳️</div>' +
@@ -517,7 +528,7 @@
   /* ============== HOME / CREATE ============== */
   var draft = null;
   function freshDraft(){
-    return { name:"", type:"single", options:["",""], autoClose:false, amount:30, unit:"minutes", allowSuggestions:false, hideResults:false };
+    return { name:"", type:"single", options:["",""], autoClose:false, amount:30, unit:"minutes", allowSuggestions:false, hideResults:false, anonymous:false };
   }
 
   function renderHome(){
@@ -533,7 +544,7 @@
       '<input class="input" id="f-name" placeholder="e.g. Where should we eat Friday?" value="'+esc(draft.name)+'" maxlength="140"></div>';
 
     html += '<div class="field"><label>Vote style</label><div class="type-grid" id="f-type">';
-    ["single","multi","ranked","tinder","rating"].forEach(function(t){
+    ["single","multi","ranked","tinder","rating","bracket"].forEach(function(t){
       var m = TYPE_META[t];
       html += '<div class="type-opt'+(draft.type===t?' active':'')+'" data-type="'+t+'" onclick="Voter.setType(\''+t+'\')">' +
         '<div class="ic">'+m.icon+'</div><div class="t">'+m.label+'</div><div class="d">'+m.desc+'</div></div>';
@@ -557,6 +568,11 @@
       '<label style="margin-bottom:2px;">Hide results until close</label>' +
       '<div class="d" style="font-size:12px;color:var(--text-faint);">Voters won\'t see the leaderboard while it\'s open</div>' +
       '</div><label class="switch"><input type="checkbox" id="f-hideresults" '+(draft.hideResults?'checked':'')+' onchange="Voter.toggleHideResults(this.checked)"><span class="track"><span class="knob"></span></span></label></div>';
+
+    html += '<div class="field switch-row"><div>' +
+      '<label style="margin-bottom:2px;">Anonymous voting</label>' +
+      '<div class="d" style="font-size:12px;color:var(--text-faint);">Never reveal who voted for what — not even to you</div>' +
+      '</div><label class="switch"><input type="checkbox" id="f-anonymous" '+(draft.anonymous?'checked':'')+' onchange="Voter.toggleAnonymous(this.checked)"><span class="track"><span class="knob"></span></span></label></div>';
 
     html += '<div class="field switch-row"><div>' +
       '<label style="margin-bottom:2px;">Auto-close poll</label>' +
@@ -613,6 +629,7 @@
     toggleAutoClose: function(v){ readDraftFromDom(); draft.autoClose = v; renderHome(); },
     toggleSuggestions: function(v){ readDraftFromDom(); draft.allowSuggestions = v; renderHome(); },
     toggleHideResults: function(v){ readDraftFromDom(); draft.hideResults = v; renderHome(); },
+    toggleAnonymous: function(v){ readDraftFromDom(); draft.anonymous = v; renderHome(); },
     deleteMyPoll: function(id){
       removeMyPoll(id);
       renderHome();
@@ -646,7 +663,8 @@
         autoCloseAt: autoCloseAt,
         hostKey: hostKey,
         allowSuggestions: !!draft.allowSuggestions,
-        hideResults: !!draft.hideResults
+        hideResults: !!draft.hideResults,
+        anonymous: !!draft.anonymous
       };
       pollRef.set(pollData).then(function(){
         setHostKey(pollId, hostKey);
@@ -660,15 +678,28 @@
 
     /* ---- poll page interactions ---- */
     submitName: function(pollId){
-      var v = $("#gate-name").value.trim();
-      if (!v){ $("#gate-name").focus(); return; }
-      setNameFor(pollId, v.slice(0,60));
+      var input = $("#gate-name");
+      var v = input.value.trim();
+      if (!v){ input.focus(); return; }
+      v = v.slice(0,60);
+
+      var key = normalizeName(v);
+      var existing = currentPoll && currentPoll.votes ? atIdx(currentPoll.votes, key) : null;
+      if (existing && existing.name){
+        var isMe = confirm('Someone named "'+existing.name+'" has already voted in this poll.\n\nIs that you?\n\nOK = yes, it\'s me (I can update my vote)\nCancel = no, that\'s someone else');
+        if (!isMe){
+          v = uniqueName(v, currentPoll.votes);
+          toast('You\'re set up as "'+v+'" since that name was taken.');
+        }
+      }
+      setNameFor(pollId, v);
       renderPollPage.current && renderPollPage.current();
     },
     changeVote: function(){
       pageState.editing = true;
       pageState.tinderIndex = 0;
       pageState.tinderChoices = {};
+      pageState.bracket = null;
       renderPollPage.current && renderPollPage.current();
     },
 
@@ -722,6 +753,20 @@
       writeVote(pollId, { name: pageState.voterName, type:"rating", ratings: ratings, votedAt: ServerTS });
     },
 
+    pickBracket: function(pollId, winnerId, loserId){
+      var br = pageState.bracket;
+      if (!br || br.champion!=null) return;
+      br.history.push({ round: br.roundNum, winner: winnerId, loser: loserId });
+      br.nextRoundIds.push(winnerId);
+      br.matchIndex++;
+      renderPollPage.current && renderPollPage.current();
+    },
+    submitBracket: function(pollId){
+      var br = pageState.bracket;
+      if (!br || br.champion==null) return;
+      writeVote(pollId, { name: pageState.voterName, type:"bracket", champion: br.champion, picks: br.history, votedAt: ServerTS });
+    },
+
     addSuggestion: function(pollId){
       var input = $("#suggest-input");
       if (!input) return;
@@ -750,7 +795,7 @@
     reopenPoll: function(pollId){
       db.ref(NS+"/polls/"+pollId+"/status").set("open");
     },
-    copyLink: function(pollId){ copyText(location.origin+location.pathname+"#/poll/"+pollId); },
+    copyLink: function(pollId){ copyText(pollUrl(pollId)); },
     toggleVoterList: function(){ pageState.showVoters = !pageState.showVoters; renderPollPage.current && renderPollPage.current(); }
   };
 
@@ -780,6 +825,7 @@
       tinderChoices: {},
       rankedOrder: [],
       ratingPick: {},
+      bracket: null,
       showVoters: false
     };
   }
@@ -859,6 +905,26 @@
     return { rounds: rounds, winnerId: winnerId, eliminatedInRound: eliminatedInRound };
   }
 
+  function getCurrentMatch(br){
+    var guard = 0;
+    while (guard++ < 500){
+      if (!br.roundIds.length){ return null; }
+      var i = br.matchIndex*2;
+      if (i >= br.roundIds.length){
+        if (br.nextRoundIds.length<=1){ br.champion = br.nextRoundIds[0]!=null ? br.nextRoundIds[0] : br.roundIds[0]; return null; }
+        br.roundIds = br.nextRoundIds; br.nextRoundIds = []; br.matchIndex = 0; br.roundNum++;
+        continue;
+      }
+      if (i+1 >= br.roundIds.length){
+        br.nextRoundIds.push(br.roundIds[i]);
+        br.matchIndex++;
+        continue;
+      }
+      return [br.roundIds[i], br.roundIds[i+1]];
+    }
+    return null;
+  }
+
   function computeResults(poll){
     var opts = optionsList(poll);
     var votes = toEntries(poll.votes).map(function(e){ return e[1]; });
@@ -902,6 +968,16 @@
       rtStats.forEach(function(s){ s.avg = s.count? (s.sum/s.count):0; s.pct = Math.round((s.avg/5)*100); });
       rtStats.sort(function(a,b){ return b.avg-a.avg || b.count-a.count; });
       return { voterCount:voterCount, stats:rtStats, kind:"rating" };
+    }
+
+    if (poll.type==="bracket"){
+      var champStats = opts.map(function(o){ return {id:o.id, text:o.text, count:0}; });
+      votes.forEach(function(v){
+        if (v.champion!=null && champStats[v.champion]) champStats[v.champion].count++;
+      });
+      champStats.forEach(function(s){ s.pct = voterCount? Math.round(100*s.count/voterCount):0; });
+      champStats.sort(function(a,b){ return b.count-a.count; });
+      return { voterCount:voterCount, stats:champStats, kind:"bracket" };
     }
 
     if (poll.type==="tinder"){
@@ -963,6 +1039,17 @@
           '<div class="lb-sub">'+s.count+' rating'+(s.count===1?"":"s")+'</div>' +
           '</div>';
       });
+    } else if (results.kind==="bracket"){
+      html += '<p style="font-size:11.5px;color:var(--text-faint);margin:-6px 0 14px;">Each voter played their own head-to-head bracket — shown below is how often each option became their champion.</p>';
+      results.stats.forEach(function(s,i){
+        html += '<div class="lb-item">' +
+          '<div class="lb-top"><div class="lb-rank '+rankClass(i)+'">'+(i+1)+'</div>' +
+          '<div class="lb-text">'+(i===0 && s.count>0?'🏆 ':'')+esc(s.text)+'</div>' +
+          '<div class="lb-stat">'+s.count+'</div></div>' +
+          '<div class="lb-bar-track"><div class="lb-bar '+(i===0?'rank1':'')+'" style="width:'+s.pct+'%;"></div></div>' +
+          '<div class="lb-sub">'+s.pct+'% picked as champion</div>' +
+          '</div>';
+      });
     } else if (results.kind==="tinder"){
       results.stats.forEach(function(s,i){
         var pct = s.answered? s.pct : 0;
@@ -1007,6 +1094,7 @@
     if (isOpen) html += '<span class="badge badge-open"><span class="badge-dot pulse"></span>Open</span>';
     else html += '<span class="badge badge-closed"><span class="badge-dot"></span>Closed</span>';
     html += '<span class="badge badge-muted">'+typeMeta.icon+' '+typeMeta.label+'</span>';
+    if (poll.anonymous) html += '<span class="badge badge-muted">🔒 Anonymous</span>';
     if (isOpen && poll.autoCloseAt){
       var rem = poll.autoCloseAt - Date.now();
       html += '<span class="badge badge-muted">⏱ closes in '+fmtDuration(rem)+'</span>';
@@ -1015,7 +1103,7 @@
 
     /* host panel */
     if (isHost){
-      var shareUrl = location.origin+location.pathname+"#/poll/"+pollId;
+      var shareUrl = pollUrl(pollId);
       html += '<div class="card host-card">';
       html += '<div class="section-label">👑 You created this poll</div>';
       html += '<div class="link-box"><span class="url">'+esc(shareUrl)+'</span>' +
@@ -1030,6 +1118,12 @@
         html += '<div class="voter-list">';
         if (!voteEntries.length){
           html += '<div style="font-size:12.5px;color:var(--text-faint);padding-top:8px;">No one has voted yet.</div>';
+        } else if (poll.anonymous){
+          html += '<div style="font-size:12.5px;color:var(--text-faint);padding-top:8px;margin-bottom:8px;">🔒 Anonymous poll — individual choices are never shown, only who has voted.</div>';
+          voteEntries.forEach(function(e){
+            var v = e[1];
+            html += '<div class="voter-list-item"><span class="vname">'+esc(v.name||"Anonymous")+'</span><span class="vchoice">✓ voted</span></div>';
+          });
         } else {
           voteEntries.forEach(function(e){
             var v = e[1];
@@ -1038,6 +1132,7 @@
             else if (poll.type==="multi"){ choiceText = (v.optionIds||[]).map(function(id){ var o=opts[id]; return o?o.text:"?"; }).join(", "); }
             else if (poll.type==="ranked"){ choiceText = (v.ranking||[]).map(function(id){ var o=opts.filter(function(x){return x.id===Number(id);})[0]; return o?o.text:"?"; }).join(" › "); }
             else if (poll.type==="rating"){ choiceText = opts.map(function(o){ var r=Number(atIdx(v.ratings,o.id)); return r>0 ? o.text+" ("+r+"★)" : null; }).filter(Boolean).join(", ") || "no ratings"; }
+            else if (poll.type==="bracket"){ var c=opts.filter(function(x){return x.id===v.champion;})[0]; choiceText = c ? "🏆 "+c.text : "—"; }
             else { choiceText = opts.filter(function(o){ return atIdx(v.choices,o.id)==="yes"; }).map(function(o){return o.text;}).join(", ") || "no yes picks"; }
             html += '<div class="voter-list-item"><span class="vname">'+esc(v.name||"Anonymous")+'</span><span class="vchoice">'+esc(choiceText)+'</span></div>';
           });
@@ -1159,6 +1254,31 @@
       });
       var anyRated = Object.keys(pageState.ratingPick).some(function(k){ return pageState.ratingPick[k]>0; });
       html += '<button class="btn btn-primary" style="margin-top:8px;" '+(anyRated?'':'disabled')+' onclick="Voter.submitRating(\''+pollId+'\')">Submit Ratings</button>';
+
+    } else if (poll.type==="bracket"){
+      if (!pageState.bracket){
+        pageState.bracket = { roundIds: opts.map(function(o){ return o.id; }), matchIndex:0, nextRoundIds:[], champion:null, roundNum:1, history:[] };
+      }
+      var br = pageState.bracket;
+      var match = br.champion==null ? getCurrentMatch(br) : null;
+      if (match){
+        var ma = opts.filter(function(x){ return x.id===match[0]; })[0];
+        var mb = opts.filter(function(x){ return x.id===match[1]; })[0];
+        html += '<div class="badge badge-muted" style="margin-bottom:14px;">Round '+br.roundNum+'</div>';
+        html += '<div class="bracket-vs">' +
+          '<button type="button" class="bracket-card" onclick="Voter.pickBracket(\''+pollId+'\','+match[0]+','+match[1]+')">'+esc(ma?ma.text:"?")+'</button>' +
+          '<div class="bracket-vs-label">VS</div>' +
+          '<button type="button" class="bracket-card" onclick="Voter.pickBracket(\''+pollId+'\','+match[1]+','+match[0]+')">'+esc(mb?mb.text:"?")+'</button>' +
+          '</div>';
+      } else if (br.champion!=null){
+        var champ = opts.filter(function(x){ return x.id===br.champion; })[0];
+        html += '<div class="center" style="padding:6px 0 4px;">' +
+          '<div style="font-size:34px;">🏆</div>' +
+          '<div style="font-size:12px;color:var(--text-faint);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin:8px 0 4px;">Your champion</div>' +
+          '<div style="font-size:20px;font-weight:800;margin-bottom:16px;">'+esc(champ?champ.text:"?")+'</div>' +
+          '</div>' +
+          '<button class="btn btn-primary" onclick="Voter.submitBracket(\''+pollId+'\')">Submit Bracket</button>';
+      }
 
     } else {
       if (myVote && !Object.keys(pageState.tinderChoices).length && pageState.tinderIndex===0){
