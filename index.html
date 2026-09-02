@@ -2,1447 +2,298 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>Voter</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗳️</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tools</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2213%22 font-size=%2214%22>🧰</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,340..700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg-0:#0f0b1e; --bg-1:#1a1230; --bg-2:#241a42;
-    --accent:#8b5cf6; --accent-2:#ec4899; --accent-3:#22d3ee;
-    --yes:#22c55e; --no:#f43f5e;
-    --surface:#1e1636cc; --surface-solid:#1e1636; --surface-2:#2a2050;
-    --border:#3a2d63; --border-soft:#2c2350;
-    --text:#f3f1fb; --text-dim:#b6adcf; --text-faint:#7d739e;
-    --radius:20px; --radius-sm:12px;
-    --shadow:0 20px 50px -12px rgba(0,0,0,.5);
+  :root {
+    color-scheme: dark;
+    --bg: #121212;
+    --text: #f2f0ea;
+    --muted: #8f8c84;
+    --line: #333330;
+    --accent: #b28a4f;
+    --accent-solid: #776b38;
   }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;}
-  body{
-    min-height:100vh;
-    font-family:'Inter',system-ui,-apple-system,sans-serif;
-    color:var(--text);
-    background:
-      radial-gradient(circle at 15% 0%, #4c1d9522, transparent 55%),
-      radial-gradient(circle at 100% 20%, #ec489922, transparent 50%),
-      radial-gradient(circle at 50% 100%, #22d3ee1a, transparent 55%),
-      linear-gradient(160deg, var(--bg-0), var(--bg-1) 45%, var(--bg-2));
-    background-attachment:fixed;
-    -webkit-font-smoothing:antialiased;
-    overflow-x:hidden;
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Fraunces', serif;
   }
-  #app{max-width:640px;margin:0 auto;padding:24px 18px 80px;min-height:100vh;}
-  a{color:inherit;}
-  h1,h2,h3,p{margin:0;}
-  button,input,select,textarea{font-family:inherit;color:inherit;}
-  input,select,textarea{outline:none;}
-  button{cursor:pointer;}
-  ::selection{background:var(--accent);color:#fff;}
-
-  /* --- top brand --- */
-  .brand{display:flex;align-items:center;gap:10px;margin-bottom:26px;cursor:pointer;user-select:none;width:fit-content;}
-  .brand .logo{
-    width:40px;height:40px;border-radius:12px;
-    background:linear-gradient(135deg,var(--accent),var(--accent-2));
-    display:flex;align-items:center;justify-content:center;font-size:20px;
-    box-shadow:0 8px 20px -6px #8b5cf699;
+  .page {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
   }
-  .brand .name{font-size:22px;font-weight:800;letter-spacing:-.02em;}
-  .brand .tag{font-size:11px;color:var(--text-faint);font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-top:-2px;}
-
-  /* --- generic surfaces --- */
-  .card{
-    background:var(--surface);
-    border:1px solid var(--border-soft);
-    border-radius:var(--radius);
-    padding:22px;
-    backdrop-filter:blur(20px);
-    box-shadow:var(--shadow);
+  .masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    color: var(--muted);
+    text-transform: uppercase;
   }
-  .card + .card{margin-top:16px;}
-  .section-label{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px;}
-
-  .hero-title{font-size:30px;font-weight:900;letter-spacing:-.03em;line-height:1.15;margin-bottom:6px;}
-  .hero-sub{color:var(--text-dim);font-size:15px;line-height:1.5;margin-bottom:22px;}
-
-  /* --- inputs --- */
-  .field{margin-bottom:18px;}
-  .field label{display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:8px;}
-  .input, textarea.input{
-    width:100%;
-    background:var(--surface-2);
-    border:1px solid var(--border);
-    border-radius:var(--radius-sm);
-    padding:13px 14px;
-    font-size:15px;
-    color:var(--text);
-    transition:border-color .15s, box-shadow .15s;
+  .masthead-logo {
+    height: 60px;
+    width: auto;
+    display: block;
   }
-  .input::placeholder{color:var(--text-faint);}
-  .input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #8b5cf633;}
-
-  .type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  @media(max-width:380px){.type-grid{grid-template-columns:1fr;}}
-  .type-opt{
-    border:1.5px solid var(--border);
-    background:var(--surface-2);
-    border-radius:var(--radius-sm);
-    padding:14px 10px;
-    text-align:center;
-    cursor:pointer;
-    transition:all .15s;
+  a.portfolio-hero {
+    display: block;
+    margin: 28px 0 56px;
+    text-decoration: none;
+    color: var(--text);
+    border: 1px solid var(--line);
+    overflow: hidden;
   }
-  .type-opt:hover{border-color:#8b5cf680;}
-  .type-opt.active{border-color:var(--accent);background:linear-gradient(135deg,#8b5cf633,#ec489922);box-shadow:0 0 0 3px #8b5cf62a;}
-  .type-opt .ic{font-size:22px;margin-bottom:6px;}
-  .type-opt .t{font-size:13px;font-weight:700;}
-  .type-opt .d{font-size:11px;color:var(--text-faint);margin-top:3px;line-height:1.3;}
-
-  .opt-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
-  .opt-row .input{flex:1;}
-  .opt-num{
-    width:26px;height:26px;border-radius:50%;background:var(--surface-2);
-    border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
-    font-size:12px;font-weight:700;color:var(--text-faint);flex-shrink:0;
+  .portfolio-frame {
+    position: relative;
+    width: 100%;
+    padding-top: 52%;
+    overflow: hidden;
+    background: #000;
   }
-  .opt-remove{
-    width:34px;height:34px;border-radius:10px;border:1px solid var(--border);
-    background:transparent;color:var(--text-faint);font-size:16px;flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;transition:all .15s;
+  .portfolio-frame iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 250%;
+    height: 250%;
+    transform: scale(0.4);
+    transform-origin: 0 0;
+    border: none;
+    pointer-events: none;
   }
-  .opt-remove:hover{background:#f43f5e22;border-color:#f43f5e66;color:#fca5b3;}
-  .add-opt-btn{
-    width:100%;padding:12px;border-radius:var(--radius-sm);
-    border:1.5px dashed var(--border);background:transparent;color:var(--text-dim);
-    font-weight:600;font-size:14px;transition:all .15s;
+  .portfolio-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px;
+    background: var(--accent-solid);
+    color: #fff;
   }
-  .add-opt-btn:hover{border-color:var(--accent);color:var(--text);background:#8b5cf611;}
-
-  .row{display:flex;align-items:center;gap:10px;}
-  .switch-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
-  .switch{position:relative;width:44px;height:26px;flex-shrink:0;}
-  .switch input{opacity:0;width:0;height:0;position:absolute;}
-  .switch .track{
-    position:absolute;inset:0;background:var(--surface-2);border:1.5px solid var(--border);
-    border-radius:20px;transition:.2s;cursor:pointer;
+  .portfolio-cta-text {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
   }
-  .switch .track:hover{border-color:#8b5cf680;}
-  .switch .knob{
-    position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;
-    background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.35);
+  .portfolio-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.75;
   }
-  .switch input:checked + .track{background:linear-gradient(135deg,var(--accent),var(--accent-2));border-color:transparent;}
-  .switch input:checked + .track .knob{transform:translateX(18px);}
-
-  .duration-row{display:flex;gap:8px;margin-top:12px;}
-  .duration-row .input{flex:1;}
-  .duration-row select.input{flex:1.4;}
-
-  .btn{
-    display:inline-flex;align-items:center;justify-content:center;gap:8px;
-    padding:14px 20px;border-radius:14px;border:none;font-weight:700;font-size:15px;
-    transition:transform .12s, filter .15s, box-shadow .15s; width:100%;
+  .portfolio-title {
+    font-size: clamp(1.3rem, 3.5vw, 1.75rem);
+    font-weight: 500;
   }
-  .btn:active{transform:scale(.98);}
-  .btn-primary{
-    background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;
-    box-shadow:0 10px 25px -8px #8b5cf699;
+  .portfolio-arrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.2rem;
+    transition: transform 0.2s ease;
   }
-  .btn-primary:hover{filter:brightness(1.08);}
-  .btn-primary:disabled{opacity:.4;cursor:not-allowed;filter:none;box-shadow:none;}
-  .btn-ghost{background:var(--surface-2);color:var(--text);border:1px solid var(--border);}
-  .btn-ghost:hover{border-color:#8b5cf680;}
-  .btn-danger-outline{background:transparent;color:#fca5b3;border:1px solid #f43f5e55;}
-  .btn-danger-outline:hover{background:#f43f5e18;}
-  .btn-sm{padding:9px 14px;font-size:13px;width:auto;border-radius:10px;}
-  .btn-row{display:flex;gap:10px;}
-  .btn-row .btn{flex:1;}
-
-  .error-box{
-    background:#f43f5e18;border:1px solid #f43f5e55;color:#fca5b3;
-    border-radius:12px;padding:12px 14px;font-size:13px;margin-bottom:16px;font-weight:600;
+  a.portfolio-hero:hover .portfolio-arrow {
+    transform: translate(4px, -4px);
   }
-
-  /* --- poll header / status --- */
-  .poll-head{margin-bottom:18px;}
-  .poll-name{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin-bottom:10px;word-break:break-word;}
-  .badge-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-  .badge{
-    display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;
-    font-size:11.5px;font-weight:700;letter-spacing:.02em;
+  .heading-row {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 0 0 40px;
   }
-  .badge-open{background:#22c55e22;color:#6ee7a3;border:1px solid #22c55e44;}
-  .badge-closed{background:#f43f5e22;color:#fca5b3;border:1px solid #f43f5e44;}
-  .badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
-  .badge-dot.pulse{animation:pulse 1.6s infinite;}
-  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
-  .badge-muted{background:var(--surface-2);color:var(--text-faint);border:1px solid var(--border);}
-
-  /* --- host panel --- */
-  .host-card{
-    background:linear-gradient(135deg,#8b5cf61f,#ec489915);
-    border:1px solid #8b5cf655;
+  h1 {
+    font-weight: 600;
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    margin: 0;
   }
-  .host-card .section-label{color:#c9b8ff;}
-  .link-box{
-    display:flex;align-items:center;gap:8px;background:var(--surface-2);
-    border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:12px;
+  h1 .dot { color: var(--accent); }
+  .lede {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 0;
   }
-  .link-box .url{flex:1;font-size:12.5px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:ui-monospace,monospace;}
-  .voter-list{margin-top:10px;}
-  .voter-list-item{
-    display:flex;justify-content:space-between;gap:10px;padding:9px 0;
-    border-bottom:1px solid var(--border-soft);font-size:13px;
+  .group-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-top: 36px;
+    padding-bottom: 8px;
   }
-  .voter-list-item:last-child{border-bottom:none;}
-  .voter-list-item .vname{font-weight:700;}
-  .voter-list-item .vchoice{color:var(--text-dim);text-align:right;}
-  .toggle-link{font-size:12.5px;color:#c9b8ff;font-weight:700;cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:4px;}
-
-  /* --- name gate --- */
-  .avatar-big{
-    width:56px;height:56px;border-radius:16px;margin:0 auto 14px;
-    background:linear-gradient(135deg,var(--accent),var(--accent-3));
-    display:flex;align-items:center;justify-content:center;font-size:26px;
+  .row {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    padding: 22px 0;
+    border-top: 1px solid var(--line);
+    text-decoration: none;
+    color: var(--text);
+    position: relative;
   }
-  .center{text-align:center;}
-
-  /* --- single/multi options --- */
-  .vote-opt{
-    display:flex;align-items:center;gap:12px;padding:16px;border-radius:14px;
-    border:1.5px solid var(--border);background:var(--surface-2);margin-bottom:10px;
-    cursor:pointer;transition:all .15s;
+  nav.index .row:last-child {
+    border-bottom: 1px solid var(--line);
   }
-  .vote-opt:hover{border-color:#8b5cf680;}
-  .vote-opt.picked{border-color:var(--accent);background:linear-gradient(135deg,#8b5cf62e,#ec48991c);box-shadow:0 0 0 3px #8b5cf62a;}
-  .vote-opt .indicator{
-    width:22px;height:22px;flex-shrink:0;border:2px solid var(--border);
-    display:flex;align-items:center;justify-content:center;transition:all .15s;
+  .row-index {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    flex: none;
+    width: 2ch;
   }
-  .vote-opt.radio .indicator{border-radius:50%;}
-  .vote-opt.checkbox .indicator{border-radius:6px;}
-  .vote-opt.picked .indicator{border-color:var(--accent);background:var(--accent);}
-  .vote-opt .indicator .dot{width:9px;height:9px;border-radius:50%;background:#fff;opacity:0;transform:scale(.4);transition:.15s;}
-  .vote-opt.picked.radio .indicator .dot{opacity:1;transform:scale(1);}
-  .vote-opt.picked.checkbox .indicator svg{opacity:1;transform:scale(1);}
-  .vote-opt .indicator svg{width:13px;height:13px;opacity:0;transform:scale(.4);transition:.15s;stroke:#fff;}
-  .otext{font-size:15.5px;font-weight:600;flex:1;word-break:break-word;}
-
-  /* --- tinder swipe --- */
-  .swipe-wrap{position:relative;height:340px;margin:6px 0 18px;}
-  .swipe-card{
-    position:absolute;inset:0;border-radius:22px;
-    background:linear-gradient(150deg,var(--surface-2),var(--surface-solid));
-    border:1.5px solid var(--border);
-    display:flex;align-items:center;justify-content:center;padding:28px;
-    text-align:center;font-size:22px;font-weight:800;letter-spacing:-.01em;
-    box-shadow:0 20px 40px -14px #00000066;
-    user-select:none; touch-action:none;
-    will-change:transform;
+  .row-info {
+    flex: 1;
+    min-width: 0;
   }
-  .swipe-card .num{
-    position:absolute;top:16px;left:18px;font-size:11px;font-weight:700;
-    color:var(--text-faint);letter-spacing:.04em;
+  .row-url {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 4px;
   }
-  .swipe-stamp{
-    position:absolute;top:22px;padding:6px 14px;border-radius:8px;
-    font-size:16px;font-weight:900;letter-spacing:.06em;border:3px solid;
-    transform:rotate(-18deg);opacity:0;transition:opacity .08s;pointer-events:none;
+  .row-title {
+    display: block;
+    font-size: clamp(1.6rem, 5.5vw, 3rem);
+    font-weight: 500;
+    line-height: 1;
+    transition: color 0.15s ease;
   }
-  .stamp-yes{left:18px;color:var(--yes);border-color:var(--yes);transform:rotate(-18deg);}
-  .stamp-no{right:18px;color:var(--no);border-color:var(--no);transform:rotate(18deg);}
-  .swipe-actions{display:flex;justify-content:center;gap:22px;margin-bottom:6px;}
-  .swipe-btn{
-    width:60px;height:60px;border-radius:50%;border:1.5px solid var(--border);
-    background:var(--surface-2);font-size:24px;display:flex;align-items:center;justify-content:center;
-    transition:all .12s;
+  a.row:hover .row-title {
+    color: var(--accent);
   }
-  .swipe-btn:active{transform:scale(.9);}
-  .swipe-btn.no{color:var(--no);}
-  .swipe-btn.yes{color:var(--yes);}
-  .swipe-btn.no:hover{border-color:var(--no);background:#f43f5e18;}
-  .swipe-btn.yes:hover{border-color:var(--yes);background:#22c55e18;}
-  .swipe-undo{
-    display:block;margin:0 auto;font-size:12.5px;color:var(--text-faint);font-weight:600;
-    background:none;border:none;padding:6px;
+  .row-arrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    color: var(--muted);
+    transition: transform 0.2s ease, color 0.2s ease;
   }
-  .swipe-undo:hover{color:var(--text);}
-  .swipe-progress{
-    height:5px;background:var(--surface-2);border-radius:4px;overflow:hidden;margin-bottom:16px;
+  a.row:hover .row-arrow {
+    color: var(--accent);
+    transform: translateX(4px);
   }
-  .swipe-progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .25s;}
-  .swipe-hint{text-align:center;font-size:12px;color:var(--text-faint);margin-top:10px;}
-
-  /* --- results / leaderboard --- */
-  .results-summary{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px;}
-  .results-summary .n{font-size:13px;color:var(--text-dim);font-weight:600;}
-  .lb-item{margin-bottom:14px;}
-  .lb-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-  .lb-rank{
-    width:22px;height:22px;border-radius:7px;background:var(--surface-2);border:1px solid var(--border);
-    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--text-faint);flex-shrink:0;
+  .row-disabled {
+    cursor: default;
+    opacity: 0.4;
+    transition: opacity 0.15s ease;
   }
-  .lb-rank.gold{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#3a2400;border:none;}
-  .lb-rank.silver{background:linear-gradient(135deg,#e2e8f0,#94a3b8);color:#1e293b;border:none;}
-  .lb-rank.bronze{background:linear-gradient(135deg,#f0a868,#c2703a);color:#3a1e00;border:none;}
-  .lb-text{font-size:14.5px;font-weight:700;flex:1;word-break:break-word;}
-  .lb-stat{font-size:13px;font-weight:800;color:var(--text-dim);flex-shrink:0;}
-  .lb-bar-track{height:10px;background:var(--surface-2);border-radius:6px;overflow:hidden;}
-  .lb-bar{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent),var(--accent-3));transition:width .5s cubic-bezier(.22,1,.36,1);}
-  .lb-bar.rank1{background:linear-gradient(90deg,#fbbf24,#ec4899);}
-  .lb-sub{font-size:11.5px;color:var(--text-faint);margin-top:4px;}
-
-  .empty-state{text-align:center;padding:30px 10px;color:var(--text-faint);}
-  .empty-state .ic{font-size:34px;margin-bottom:10px;}
-
-  .spinner{
-    width:30px;height:30px;border-radius:50%;border:3px solid var(--border);
-    border-top-color:var(--accent);animation:spin .7s linear infinite;margin:40px auto;
+  .row-disabled:hover {
+    opacity: 0.65;
   }
-  @keyframes spin{to{transform:rotate(360deg);}}
-
-  .link-item{
-    display:flex;justify-content:space-between;align-items:center;gap:10px;
-    padding:13px 14px;border-radius:12px;background:var(--surface-2);
-    border:1px solid var(--border);margin-bottom:8px;cursor:pointer;transition:.15s;
+  .row-disabled .row-arrow {
+    visibility: hidden;
   }
-  .link-item:hover{border-color:#8b5cf680;}
-  .link-item .lname{font-weight:700;font-size:14px;}
-  .link-item .lmeta{font-size:11.5px;color:var(--text-faint);margin-top:2px;}
-  .link-item .arrow{color:var(--text-faint);}
-  .link-item .lmain{flex:1;min-width:0;}
-  .link-del{
-    width:30px;height:30px;border-radius:9px;border:1px solid transparent;
-    background:transparent;color:var(--text-faint);font-size:14px;flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;transition:all .15s;
+  .row-tooltip {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--accent);
+    padding: 6px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%) translateY(6px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
   }
-  .link-del:hover{background:#f43f5e22;border-color:#f43f5e66;color:#fca5b3;}
-
-  /* --- ranked choice --- */
-  .rank-row{
-    display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;
-    background:var(--surface-2);border:1.5px solid var(--border);margin-bottom:8px;
+  .row-disabled:hover .row-tooltip {
+    opacity: 1;
+    transform: translateY(-50%) translateY(0);
   }
-  .rank-arrows{display:flex;flex-direction:column;gap:3px;}
-  .rank-arrow{
-    width:30px;height:22px;border-radius:6px;border:1px solid var(--border);
-    background:var(--surface-solid);color:var(--text-dim);font-size:10px;
-    display:flex;align-items:center;justify-content:center;line-height:1;
-  }
-  .rank-arrow:hover{border-color:var(--accent);color:var(--text);}
-  .rank-arrow:disabled{opacity:.25;cursor:default;}
-
-  /* --- star rating --- */
-  .stars{display:flex;gap:2px;flex-shrink:0;}
-  .star-btn{
-    width:30px;height:30px;border-radius:8px;border:none;background:transparent;
-    font-size:20px;color:var(--border);transition:all .1s;
-  }
-  .star-btn.filled{color:#fbbf24;}
-  .star-btn:hover{color:#fbbf24;transform:scale(1.1);}
-
-  /* --- bracket --- */
-  .bracket-vs{display:flex;flex-direction:column;gap:10px;align-items:stretch;margin-bottom:4px;}
-  .bracket-card{
-    padding:22px 16px;border-radius:16px;border:1.5px solid var(--border);
-    background:var(--surface-2);color:var(--text);font-size:17px;font-weight:800;
-    text-align:center;transition:all .15s;width:100%;
-  }
-  .bracket-card:hover{border-color:var(--accent);background:linear-gradient(135deg,#8b5cf62e,#ec48991c);transform:scale(1.01);}
-  .bracket-card:active{transform:scale(.98);}
-  .bracket-vs-label{text-align:center;font-size:11px;font-weight:800;color:var(--text-faint);letter-spacing:.08em;}
-
-  .toast{
-    position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
-    background:#000c;backdrop-filter:blur(10px);color:#fff;padding:11px 18px;
-    border-radius:30px;font-size:13px;font-weight:600;z-index:999;
-    box-shadow:0 10px 30px -8px #000a;opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;
-    border:1px solid #ffffff22;
-  }
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
-
-  .modal-overlay{
-    position:fixed;inset:0;background:rgba(10,6,22,.68);backdrop-filter:blur(3px);
-    display:flex;align-items:center;justify-content:center;z-index:1000;
-    padding:20px;opacity:0;pointer-events:none;transition:opacity .15s;
-  }
-  .modal-overlay.show{opacity:1;pointer-events:auto;}
-  .modal-card{
-    background:var(--surface-solid);border:1px solid var(--border-soft);border-radius:var(--radius);
-    padding:26px 24px;max-width:380px;width:100%;box-shadow:var(--shadow);
-    transform:scale(.95) translateY(8px);transition:transform .15s;
-  }
-  .modal-overlay.show .modal-card{transform:scale(1) translateY(0);}
-  .modal-icon{font-size:32px;text-align:center;margin-bottom:12px;}
-  .modal-title{font-size:17px;font-weight:800;text-align:center;margin-bottom:8px;}
-  .modal-message{font-size:14px;color:var(--text-dim);text-align:center;line-height:1.5;margin-bottom:22px;white-space:pre-line;}
-  .modal-actions{display:flex;gap:10px;}
-  .modal-actions .btn{flex:1;}
-  .btn-danger{background:linear-gradient(135deg,#f43f5e,#dc2626);color:#fff;box-shadow:0 10px 25px -8px #f43f5e99;}
-  .btn-danger:hover{filter:brightness(1.08);}
-
-  .footer-note{text-align:center;color:var(--text-faint);font-size:11.5px;margin-top:26px;line-height:1.6;}
-  .change-vote-link{
-    text-align:center;margin-top:16px;font-size:13px;font-weight:700;color:#c9b8ff;cursor:pointer;user-select:none;
+  footer {
+    margin-top: 60px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
   }
 </style>
 </head>
 <body>
-<div id="app"></div>
-<div id="toast" class="toast"></div>
-<div id="modal-root"></div>
-
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
-<script>
-(function(){
-  "use strict";
-
-  /* ============== Firebase (shared project, isolated namespace) ============== */
-  var firebaseConfig = {
-    apiKey: "AIzaSyDGpfYn1-YMV6jkJn9nDgvk1_yrYydem0U",
-    authDomain: "ski-trip-2027.firebaseapp.com",
-    databaseURL: "https://ski-trip-2027-default-rtdb.firebaseio.com",
-    projectId: "ski-trip-2027",
-    storageBucket: "ski-trip-2027.firebasestorage.app",
-    messagingSenderId: "248692108351",
-    appId: "1:248692108351:web:f65f4b12bbf0987b6bdc8a"
-  };
-  firebase.initializeApp(firebaseConfig);
-  var db = firebase.database();
-  var NS = "voter"; // all Voter data lives under this root key only — never touches other microsites' data
-  var ServerTS = firebase.database.ServerValue.TIMESTAMP;
-
-  /* ============== helpers ============== */
-  function $(sel, root){ return (root||document).querySelector(sel); }
-  function esc(s){
-    return String(s==null?"":s).replace(/[&<>"']/g, function(c){
-      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
-    });
-  }
-  function uid(){ return "u" + Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
-  function normalizeName(name){
-    var n = String(name||"").trim().toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"");
-    return n || ("guest_" + Math.random().toString(36).slice(2,8));
-  }
-  function uniqueName(base, votes){
-    var n = 2, candidate;
-    do {
-      candidate = base + " " + n;
-      n++;
-    } while (atIdx(votes, normalizeName(candidate)));
-    return candidate;
-  }
-  function atIdx(collection, idx){
-    if (collection == null) return undefined;
-    if (Array.isArray(collection)) return collection[idx];
-    return collection[idx] !== undefined ? collection[idx] : collection[String(idx)];
-  }
-  function toEntries(collection){
-    if (collection == null) return [];
-    if (Array.isArray(collection)){
-      var out=[];
-      for (var i=0;i<collection.length;i++){ if (collection[i]!==undefined && collection[i]!==null) out.push([i, collection[i]]); }
-      return out;
-    }
-    return Object.keys(collection).map(function(k){ return [k, collection[k]]; });
-  }
-  function optionsList(poll){
-    return toEntries(poll.options).map(function(e){ return { id: Number(e[0]), text: e[1] }; })
-      .sort(function(a,b){ return a.id-b.id; });
-  }
-  function fmtDuration(ms){
-    if (ms<=0) return "0m";
-    var s = Math.floor(ms/1000);
-    var d = Math.floor(s/86400); s-=d*86400;
-    var h = Math.floor(s/3600); s-=h*3600;
-    var m = Math.floor(s/60);
-    var parts=[];
-    if (d) parts.push(d+"d");
-    if (h) parts.push(h+"h");
-    if (m || (!d&&!h)) parts.push(m+"m");
-    return parts.slice(0,2).join(" ");
-  }
-  function fmtWhen(ts){
-    if (!ts) return "";
-    var d = new Date(ts);
-    return d.toLocaleDateString(undefined,{month:"short",day:"numeric"}) + " · " + d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
-  }
-  var toastTimer=null;
-  function toast(msg){
-    var el = $("#toast");
-    el.textContent = msg;
-    el.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function(){ el.classList.remove("show"); }, 2200);
-  }
-  function showConfirm(opts){
-    return new Promise(function(resolve){
-      var root = $("#modal-root");
-      var confirmClass = opts.danger ? "btn-danger" : "btn-primary";
-      root.innerHTML =
-        '<div class="modal-overlay" id="modal-overlay">' +
-          '<div class="modal-card">' +
-            (opts.icon ? '<div class="modal-icon">'+opts.icon+'</div>' : '') +
-            '<div class="modal-title">'+esc(opts.title||"")+'</div>' +
-            '<div class="modal-message">'+esc(opts.message||"")+'</div>' +
-            '<div class="modal-actions">' +
-              '<button type="button" class="btn btn-ghost" id="modal-cancel">'+esc(opts.cancelLabel||"Cancel")+'</button>' +
-              '<button type="button" class="btn '+confirmClass+'" id="modal-confirm">'+esc(opts.confirmLabel||"OK")+'</button>' +
-            '</div>' +
-          '</div>' +
-        '</div>';
-      requestAnimationFrame(function(){ var ov=$("#modal-overlay"); if (ov) ov.classList.add("show"); });
-
-      function onKey(e){ if (e.key==="Escape") finish(false); }
-      function finish(result){
-        document.removeEventListener("keydown", onKey);
-        root.innerHTML = "";
-        resolve(result);
-      }
-      document.addEventListener("keydown", onKey);
-      $("#modal-confirm").onclick = function(){ finish(true); };
-      $("#modal-cancel").onclick = function(){ finish(false); };
-      $("#modal-overlay").onclick = function(e){ if (e.target.id==="modal-overlay") finish(false); };
-    });
-  }
-
-  function copyText(text){
-    if (navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(function(){ toast("Link copied!"); }, function(){ fallbackCopy(text); });
-    } else fallbackCopy(text);
-  }
-  function fallbackCopy(text){
-    var ta=document.createElement("textarea");
-    ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
-    document.body.appendChild(ta); ta.select();
-    try{ document.execCommand("copy"); toast("Link copied!"); }catch(e){ toast("Copy failed — long-press the link"); }
-    document.body.removeChild(ta);
-  }
-  function hostKeyFor(pollId){ try{ return localStorage.getItem("voter_host_"+pollId); }catch(e){ return null; } }
-  function setHostKey(pollId, key){ try{ localStorage.setItem("voter_host_"+pollId, key); }catch(e){} }
-  function nameFor(pollId){ try{ return localStorage.getItem("voter_name_"+pollId) || ""; }catch(e){ return ""; } }
-  function setNameFor(pollId, name){ try{ localStorage.setItem("voter_name_"+pollId, name); }catch(e){} }
-  function myPolls(){ try{ return JSON.parse(localStorage.getItem("voter_myPolls")||"[]"); }catch(e){ return []; } }
-  function addMyPoll(id,name,type){
-    try{
-      var list = myPolls().filter(function(p){ return p.id!==id; });
-      list.unshift({id:id, name:name, type:type, createdAt:Date.now()});
-      localStorage.setItem("voter_myPolls", JSON.stringify(list.slice(0,25)));
-    }catch(e){}
-  }
-  function removeMyPoll(id){
-    try{
-      var list = myPolls().filter(function(p){ return p.id!==id; });
-      localStorage.setItem("voter_myPolls", JSON.stringify(list));
-    }catch(e){}
-  }
-
-  var TYPE_META = {
-    single:  { icon:"◉", label:"Single Choice", desc:"Pick one" },
-    multi:   { icon:"☑︎", label:"Multiple Choice", desc:"Pick any" },
-    ranked:  { icon:"🥇", label:"Ranked Choice", desc:"Order all options" },
-    tinder:  { icon:"⇄", label:"Swipe Yes/No", desc:"Card by card" },
-    rating:  { icon:"⭐", label:"Star Rating", desc:"Rate each 1–5" },
-    bracket: { icon:"⚔️", label:"Bracket", desc:"Head-to-head rounds" }
-  };
-  var UNIT_MS = { minutes:60000, hours:3600000, days:86400000 };
-
-  /* ============== router / lifecycle ============== */
-  var app = $("#app");
-  var activeListenerRef = null, activeListenerFn = null;
-  var activeIntervals = [];
-  function teardown(){
-    if (activeListenerRef && activeListenerFn) activeListenerRef.off("value", activeListenerFn);
-    activeListenerRef=null; activeListenerFn=null;
-    activeIntervals.forEach(clearInterval); activeIntervals=[];
-  }
-  function route(){
-    teardown();
-    var hash = location.hash.replace(/^#\/?/, "");
-    var m = hash.match(/^poll\/([^\/?]+)/);
-    if (m) renderPollPage(m[1]); else renderHome();
-  }
-  window.addEventListener("hashchange", route);
-
-  function goHome(){ location.hash = "#/"; }
-  function pollUrl(pollId){ return location.origin + "/#/poll/" + pollId; }
-  function brandHtml(){
-    return '<div class="brand" onclick="Voter.home()">' +
-      '<div class="logo">🗳️</div>' +
-      '<div><div class="name">Voter</div><div class="tag">Vote fast, decide faster</div></div>' +
-    '</div>';
-  }
-
-  /* ============== HOME / CREATE ============== */
-  var draft = null;
-  function freshDraft(){
-    return { name:"", type:"single", options:["",""], autoClose:false, amount:30, unit:"minutes", allowSuggestions:false, hideResults:false, anonymous:false };
-  }
-
-  function renderHome(){
-    if (!draft) draft = freshDraft();
-    var polls = myPolls();
-
-    var html = brandHtml();
-    html += '<div class="card">';
-    html += '<h1 class="hero-title">Create a poll</h1>';
-    html += '<p class="hero-sub">Type in your options, pick a voting style, and share the link in your group chat.</p>';
-
-    html += '<div class="field"><label>Poll question</label>' +
-      '<input class="input" id="f-name" placeholder="e.g. Where should we eat Friday?" value="'+esc(draft.name)+'" maxlength="140"></div>';
-
-    html += '<div class="field"><label>Vote style</label><div class="type-grid" id="f-type">';
-    ["single","multi","ranked","tinder","rating","bracket"].forEach(function(t){
-      var m = TYPE_META[t];
-      html += '<div class="type-opt'+(draft.type===t?' active':'')+'" data-type="'+t+'" onclick="Voter.setType(\''+t+'\')">' +
-        '<div class="ic">'+m.icon+'</div><div class="t">'+m.label+'</div><div class="d">'+m.desc+'</div></div>';
-    });
-    html += '</div></div>';
-
-    html += '<div class="field"><label>Options</label><div id="f-options">';
-    draft.options.forEach(function(opt,i){
-      html += '<div class="opt-row"><div class="opt-num">'+(i+1)+'</div>' +
-        '<input class="input" data-opt-idx="'+i+'" placeholder="Option '+(i+1)+'" value="'+esc(opt)+'" maxlength="200">' +
-        '<button type="button" class="opt-remove" onclick="Voter.removeOption('+i+')" '+(draft.options.length<=2?'disabled style="opacity:.25;cursor:default;"':'')+'>✕</button></div>';
-    });
-    html += '</div><button type="button" class="add-opt-btn" onclick="Voter.addOption()">+ Add option</button></div>';
-
-    html += '<div class="field switch-row"><div>' +
-      '<label style="margin-bottom:2px;">Let voters add options</label>' +
-      '<div class="d" style="font-size:12px;color:var(--text-faint);">Anyone can suggest a new option while voting</div>' +
-      '</div><label class="switch"><input type="checkbox" id="f-suggestions" '+(draft.allowSuggestions?'checked':'')+' onchange="Voter.toggleSuggestions(this.checked)"><span class="track"><span class="knob"></span></span></label></div>';
-
-    html += '<div class="field switch-row"><div>' +
-      '<label style="margin-bottom:2px;">Hide results until close</label>' +
-      '<div class="d" style="font-size:12px;color:var(--text-faint);">Voters won\'t see the leaderboard while it\'s open</div>' +
-      '</div><label class="switch"><input type="checkbox" id="f-hideresults" '+(draft.hideResults?'checked':'')+' onchange="Voter.toggleHideResults(this.checked)"><span class="track"><span class="knob"></span></span></label></div>';
-
-    html += '<div class="field switch-row"><div>' +
-      '<label style="margin-bottom:2px;">Anonymous voting</label>' +
-      '<div class="d" style="font-size:12px;color:var(--text-faint);">Never reveal who voted for what — not even to you</div>' +
-      '</div><label class="switch"><input type="checkbox" id="f-anonymous" '+(draft.anonymous?'checked':'')+' onchange="Voter.toggleAnonymous(this.checked)"><span class="track"><span class="knob"></span></span></label></div>';
-
-    html += '<div class="field switch-row"><div>' +
-      '<label style="margin-bottom:2px;">Auto-close poll</label>' +
-      '<div class="d" style="font-size:12px;color:var(--text-faint);">Stop accepting votes automatically</div>' +
-      '</div><label class="switch"><input type="checkbox" id="f-autoclose" '+(draft.autoClose?'checked':'')+' onchange="Voter.toggleAutoClose(this.checked)"><span class="track"><span class="knob"></span></span></label></div>';
-
-    if (draft.autoClose){
-      html += '<div class="duration-row" id="f-duration">' +
-        '<input class="input" type="number" min="1" max="999" id="f-amount" value="'+esc(draft.amount)+'">' +
-        '<select class="input" id="f-unit">' +
-        ["minutes","hours","days"].map(function(u){ return '<option value="'+u+'" '+(draft.unit===u?'selected':'')+'>'+u+'</option>'; }).join("") +
-        '</select></div>';
-    }
-
-    html += '<div id="f-error"></div>';
-    html += '<button class="btn btn-primary" style="margin-top:6px;" onclick="Voter.createPoll()">🚀 Start Poll</button>';
-    html += '</div>'; // card
-
-    if (polls.length){
-      html += '<div class="section-label" style="margin:26px 0 10px;">Your recent polls</div>';
-      polls.slice(0,8).forEach(function(p){
-        var m = TYPE_META[p.type] || TYPE_META.single;
-        html += '<div class="link-item" onclick="location.hash=\'#/poll/'+p.id+'\'">' +
-          '<div class="lmain"><div class="lname">'+esc(p.name||"Untitled poll")+'</div><div class="lmeta">'+m.icon+' '+m.label+' · '+fmtWhen(p.createdAt)+'</div></div>' +
-          '<button type="button" class="link-del" title="Remove from history" onclick="event.stopPropagation();Voter.deleteMyPoll(\''+p.id+'\')">✕</button>' +
-          '<div class="arrow">›</div></div>';
-      });
-    }
-
-    html += '<div class="footer-note">Voter · polls are stored privately under their own share link</div>';
-    app.innerHTML = html;
-  }
-
-  function readDraftFromDom(){
-    var nameEl = $("#f-name");
-    if (nameEl) draft.name = nameEl.value;
-    document.querySelectorAll("[data-opt-idx]").forEach(function(el){
-      draft.options[Number(el.getAttribute("data-opt-idx"))] = el.value;
-    });
-    var amt = $("#f-amount"); if (amt) draft.amount = amt.value;
-    var unit = $("#f-unit"); if (unit) draft.unit = unit.value;
-  }
-
-  window.Voter = {
-    home: function(){ goHome(); },
-
-    setType: function(t){ readDraftFromDom(); draft.type = t; renderHome(); },
-    addOption: function(){ readDraftFromDom(); draft.options.push(""); renderHome(); focusLastOption(); },
-    removeOption: function(i){
-      readDraftFromDom();
-      if (draft.options.length<=2) return;
-      draft.options.splice(i,1); renderHome();
-    },
-    toggleAutoClose: function(v){ readDraftFromDom(); draft.autoClose = v; renderHome(); },
-    toggleSuggestions: function(v){ readDraftFromDom(); draft.allowSuggestions = v; renderHome(); },
-    toggleHideResults: function(v){ readDraftFromDom(); draft.hideResults = v; renderHome(); },
-    toggleAnonymous: function(v){ readDraftFromDom(); draft.anonymous = v; renderHome(); },
-    deleteMyPoll: function(id){
-      removeMyPoll(id);
-      renderHome();
-    },
-
-    createPoll: function(){
-      readDraftFromDom();
-      var name = draft.name.trim();
-      var opts = draft.options.map(function(o){ return o.trim(); }).filter(Boolean);
-      var errs = [];
-      if (!name) errs.push("Give your poll a question or name.");
-      if (opts.length<2) errs.push("Add at least 2 options.");
-      if (draft.autoClose){
-        var amt = Number(draft.amount);
-        if (!amt || amt<=0) errs.push("Auto-close duration must be a positive number.");
-      }
-      if (errs.length){
-        $("#f-error").innerHTML = '<div class="error-box">'+errs.map(esc).join("<br>")+'</div>';
-        return;
-      }
-      var pollRef = db.ref(NS+"/polls").push();
-      var pollId = pollRef.key;
-      var hostKey = uid();
-      var autoCloseAt = draft.autoClose ? (Date.now() + Number(draft.amount)*UNIT_MS[draft.unit]) : null;
-      var pollData = {
-        name: name,
-        type: draft.type,
-        options: opts,
-        status: "open",
-        createdAt: ServerTS,
-        autoCloseAt: autoCloseAt,
-        hostKey: hostKey,
-        allowSuggestions: !!draft.allowSuggestions,
-        hideResults: !!draft.hideResults,
-        anonymous: !!draft.anonymous
-      };
-      pollRef.set(pollData).then(function(){
-        setHostKey(pollId, hostKey);
-        addMyPoll(pollId, name, draft.type);
-        draft = freshDraft();
-        location.hash = "#/poll/"+pollId;
-      }).catch(function(err){
-        $("#f-error").innerHTML = '<div class="error-box">Could not create poll: '+esc(err.message||err)+'</div>';
-      });
-    },
-
-    /* ---- poll page interactions ---- */
-    submitName: function(pollId){
-      var input = $("#gate-name");
-      var v = input.value.trim();
-      if (!v){ input.focus(); return; }
-      v = v.slice(0,60);
-
-      var key = normalizeName(v);
-      var existing = currentPoll && currentPoll.votes ? atIdx(currentPoll.votes, key) : null;
-      if (existing && existing.name){
-        showConfirm({
-          icon: "🤔",
-          title: "Is that you?",
-          message: '"'+existing.name+'" has already voted in this poll. Confirm it\'s you if you want to update your vote.',
-          confirmLabel: "Yes, that's me",
-          cancelLabel: "No, someone else"
-        }).then(function(isMe){
-          var finalName = v;
-          if (!isMe){
-            finalName = uniqueName(v, currentPoll.votes);
-            toast('You\'re set up as "'+finalName+'" since that name was taken.');
-          }
-          setNameFor(pollId, finalName);
-          renderPollPage.current && renderPollPage.current();
-        });
-        return;
-      }
-      setNameFor(pollId, v);
-      renderPollPage.current && renderPollPage.current();
-    },
-    changeVote: function(){
-      pageState.editing = true;
-      pageState.tinderIndex = 0;
-      pageState.tinderChoices = {};
-      pageState.bracket = null;
-      renderPollPage.current && renderPollPage.current();
-    },
-
-    pickSingle: function(idx){ pageState.singlePick = idx; renderPollPage.current && renderPollPage.current(); },
-    toggleMulti: function(idx){
-      var s = pageState.multiPick;
-      var pos = s.indexOf(idx);
-      if (pos>=0) s.splice(pos,1); else s.push(idx);
-      renderPollPage.current && renderPollPage.current();
-    },
-    submitSingle: function(pollId){
-      if (pageState.singlePick==null) return;
-      writeVote(pollId, { name: pageState.voterName, type:"single", optionId: pageState.singlePick, votedAt: ServerTS });
-    },
-    submitMulti: function(pollId){
-      if (!pageState.multiPick.length) return;
-      writeVote(pollId, { name: pageState.voterName, type:"multi", optionIds: pageState.multiPick.slice(), votedAt: ServerTS });
-    },
-
-    swipeAnswer: function(pollId, answer){ handleSwipe(pollId, answer); },
-    swipeUndo: function(){
-      if (pageState.tinderIndex>0){
-        pageState.tinderIndex--;
-        delete pageState.tinderChoices[pageState.tinderIndex];
-        renderPollPage.current && renderPollPage.current();
-      }
-    },
-
-    moveRank: function(i, dir){
-      var arr = pageState.rankedOrder;
-      var j = i+dir;
-      if (j<0 || j>=arr.length) return;
-      var tmp = arr[i]; arr[i]=arr[j]; arr[j]=tmp;
-      renderPollPage.current && renderPollPage.current();
-    },
-    submitRanking: function(pollId){
-      if (!pageState.rankedOrder || !pageState.rankedOrder.length) return;
-      writeVote(pollId, { name: pageState.voterName, type:"ranked", ranking: pageState.rankedOrder.slice(), votedAt: ServerTS });
-    },
-
-    setRating: function(optionId, value){
-      pageState.ratingPick[optionId] = (pageState.ratingPick[optionId]===value ? 0 : value);
-      renderPollPage.current && renderPollPage.current();
-    },
-    submitRating: function(pollId){
-      var ratings = {}, any=false;
-      Object.keys(pageState.ratingPick).forEach(function(k){
-        if (pageState.ratingPick[k]>0){ ratings[k]=pageState.ratingPick[k]; any=true; }
-      });
-      if (!any) return;
-      writeVote(pollId, { name: pageState.voterName, type:"rating", ratings: ratings, votedAt: ServerTS });
-    },
-
-    pickBracket: function(pollId, winnerId, loserId){
-      var br = pageState.bracket;
-      if (!br || br.champion!=null) return;
-      br.history.push({ round: br.roundNum, winner: winnerId, loser: loserId });
-      br.nextRoundIds.push(winnerId);
-      br.matchIndex++;
-      renderPollPage.current && renderPollPage.current();
-    },
-    submitBracket: function(pollId){
-      var br = pageState.bracket;
-      if (!br || br.champion==null) return;
-      writeVote(pollId, { name: pageState.voterName, type:"bracket", champion: br.champion, picks: br.history, votedAt: ServerTS });
-    },
-
-    addSuggestion: function(pollId){
-      var input = $("#suggest-input");
-      if (!input) return;
-      var text = input.value.trim().slice(0,200);
-      if (!text) return;
-      input.disabled = true;
-      db.ref(NS+"/polls/"+pollId+"/options").transaction(function(current){
-        var arr = Array.isArray(current) ? current.slice() : (current ? Object.keys(current).sort(function(a,b){return Number(a)-Number(b);}).map(function(k){return current[k];}) : []);
-        var exists = arr.some(function(t){ return String(t).trim().toLowerCase()===text.toLowerCase(); });
-        if (exists) return; // abort transaction — no change
-        arr.push(text);
-        return arr;
-      }, function(err, committed){
-        input.disabled = false;
-        if (err){ toast("Couldn't add option: "+(err.message||err)); return; }
-        if (!committed){ toast("That option already exists"); return; }
-        input.value = "";
-        toast("Option added!");
-      });
-    },
-
-    closePoll: function(pollId){
-      showConfirm({
-        icon: "🔒",
-        title: "Close this poll?",
-        message: "People won't be able to vote anymore. You can reopen it later if you change your mind.",
-        confirmLabel: "End poll now",
-        cancelLabel: "Cancel",
-        danger: true
-      }).then(function(ok){
-        if (ok) db.ref(NS+"/polls/"+pollId+"/status").set("closed");
-      });
-    },
-    reopenPoll: function(pollId){
-      db.ref(NS+"/polls/"+pollId+"/status").set("open");
-    },
-    copyLink: function(pollId){ copyText(pollUrl(pollId)); },
-    toggleVoterList: function(){ pageState.showVoters = !pageState.showVoters; renderPollPage.current && renderPollPage.current(); }
-  };
-
-  function focusLastOption(){
-    var els = document.querySelectorAll("[data-opt-idx]");
-    if (els.length) els[els.length-1].focus();
-  }
-
-  function writeVote(pollId, voteObj){
-    var key = normalizeName(voteObj.name);
-    db.ref(NS+"/polls/"+pollId+"/votes/"+key).set(voteObj).then(function(){
-      pageState.editing = false;
-      toast("Vote recorded!");
-    }).catch(function(err){ toast("Couldn't save vote: "+(err.message||err)); });
-  }
-
-  /* ============== POLL PAGE ============== */
-  var pageState = {};
-  var currentPoll = null;
-  function resetPageState(pollId){
-    pageState = {
-      voterName: nameFor(pollId),
-      editing: false,
-      singlePick: null,
-      multiPick: [],
-      tinderIndex: 0,
-      tinderChoices: {},
-      rankedOrder: [],
-      ratingPick: {},
-      bracket: null,
-      showVoters: false
-    };
-  }
-
-  function renderPollPage(pollId){
-    resetPageState(pollId);
-    currentPoll = null;
-    app.innerHTML = brandHtml() + '<div class="spinner"></div>';
-
-    var ref = db.ref(NS+"/polls/"+pollId);
-    var onVal = function(snap){
-      var poll = snap.val();
-      currentPoll = poll;
-      if (!poll){
-        app.innerHTML = brandHtml() + '<div class="card empty-state"><div class="ic">🔍</div><p>Poll not found.</p><p style="font-size:12.5px;margin-top:6px;">It may have been removed, or the link is incomplete.</p></div>';
-        return;
-      }
-      checkAutoClose(pollId, poll);
-      renderPollUI(pollId, poll);
-    };
-    ref.on("value", onVal, function(err){
-      app.innerHTML = brandHtml() + '<div class="card empty-state"><div class="ic">⚠️</div><p>Couldn\'t load this poll.</p></div>';
-    });
-    activeListenerRef = ref; activeListenerFn = onVal;
-
-    var iv = setInterval(function(){ if (currentPoll) renderPollUI(pollId, currentPoll); }, 20000);
-    activeIntervals.push(iv);
-
-    renderPollPage.current = function(){ if (currentPoll) renderPollUI(pollId, currentPoll); };
-  }
-
-  var autoCloseGuard = {};
-  function checkAutoClose(pollId, poll){
-    if (poll.status==="open" && poll.autoCloseAt && Date.now()>=poll.autoCloseAt && !autoCloseGuard[pollId]){
-      autoCloseGuard[pollId]=true;
-      db.ref(NS+"/polls/"+pollId+"/status").set("closed");
-    }
-  }
-
-  function runIRV(optIds, ballots){
-    var remaining = optIds.slice();
-    var rounds = [];
-    var eliminatedInRound = {};
-    var roundNum = 0;
-    var winnerId = remaining[0];
-    while (true){
-      roundNum++;
-      var counts = {}; remaining.forEach(function(id){ counts[id]=0; });
-      var exhausted = 0;
-      ballots.forEach(function(ranking){
-        var choice = null;
-        for (var i=0;i<ranking.length;i++){ if (remaining.indexOf(ranking[i])>=0){ choice = ranking[i]; break; } }
-        if (choice!=null) counts[choice]++; else exhausted++;
-      });
-      var totalActive = ballots.length - exhausted;
-      rounds.push({ n: roundNum, counts: counts, exhausted: exhausted });
-
-      if (remaining.length===1){ winnerId = remaining[0]; break; }
-
-      var maxId=remaining[0], minId=remaining[0];
-      remaining.forEach(function(id){
-        if (counts[id]>counts[maxId]) maxId=id;
-        if (counts[id]<counts[minId]) minId=id;
-      });
-
-      if (totalActive>0 && counts[maxId] > totalActive/2){
-        winnerId = maxId;
-        remaining.filter(function(id){ return id!==maxId; }).forEach(function(id){ eliminatedInRound[id]=roundNum; });
-        break;
-      }
-      if (totalActive===0){ winnerId = remaining[0]; break; }
-
-      eliminatedInRound[minId] = roundNum;
-      remaining = remaining.filter(function(id){ return id!==minId; });
-      if (remaining.length===0){ winnerId = minId; break; }
-    }
-    return { rounds: rounds, winnerId: winnerId, eliminatedInRound: eliminatedInRound };
-  }
-
-  function getCurrentMatch(br){
-    var guard = 0;
-    while (guard++ < 500){
-      if (!br.roundIds.length){ return null; }
-      var i = br.matchIndex*2;
-      if (i >= br.roundIds.length){
-        if (br.nextRoundIds.length<=1){ br.champion = br.nextRoundIds[0]!=null ? br.nextRoundIds[0] : br.roundIds[0]; return null; }
-        br.roundIds = br.nextRoundIds; br.nextRoundIds = []; br.matchIndex = 0; br.roundNum++;
-        continue;
-      }
-      if (i+1 >= br.roundIds.length){
-        br.nextRoundIds.push(br.roundIds[i]);
-        br.matchIndex++;
-        continue;
-      }
-      return [br.roundIds[i], br.roundIds[i+1]];
-    }
-    return null;
-  }
-
-  function computeResults(poll){
-    var opts = optionsList(poll);
-    var votes = toEntries(poll.votes).map(function(e){ return e[1]; });
-    var voterCount = votes.length;
-
-    if (poll.type==="ranked"){
-      var optIds = opts.map(function(o){ return o.id; });
-      var ballots = votes.map(function(v){
-        return (v.ranking||[]).map(Number).filter(function(id){ return optIds.indexOf(id)>=0; });
-      }).filter(function(b){ return b.length>0; });
-      var irv = runIRV(optIds, ballots);
-      var round1 = irv.rounds[0] || { counts:{} };
-      var order = optIds.slice().sort(function(a,b){
-        if (a===irv.winnerId) return -1;
-        if (b===irv.winnerId) return 1;
-        var ra = irv.eliminatedInRound[a]||0, rb = irv.eliminatedInRound[b]||0;
-        if (rb!==ra) return rb-ra;
-        return (round1.counts[b]||0)-(round1.counts[a]||0);
-      });
-      var rstats = order.map(function(id){
-        var o = opts.filter(function(x){ return x.id===id; })[0];
-        var fc = round1.counts[id]||0;
-        return {
-          id:id, text:o?o.text:"?", firstChoice:fc,
-          pct: voterCount? Math.round(100*fc/voterCount):0,
-          isWinner: id===irv.winnerId,
-          eliminatedRound: irv.eliminatedInRound[id]||null
-        };
-      });
-      return { voterCount:voterCount, stats:rstats, kind:"ranked", rounds:irv.rounds };
-    }
-
-    if (poll.type==="rating"){
-      var rtStats = opts.map(function(o){ return {id:o.id, text:o.text, sum:0, count:0}; });
-      votes.forEach(function(v){
-        opts.forEach(function(o){
-          var r = Number(atIdx(v.ratings, o.id));
-          if (r>0){ rtStats[o.id].sum+=r; rtStats[o.id].count++; }
-        });
-      });
-      rtStats.forEach(function(s){ s.avg = s.count? (s.sum/s.count):0; s.pct = Math.round((s.avg/5)*100); });
-      rtStats.sort(function(a,b){ return b.avg-a.avg || b.count-a.count; });
-      return { voterCount:voterCount, stats:rtStats, kind:"rating" };
-    }
-
-    if (poll.type==="bracket"){
-      var champStats = opts.map(function(o){ return {id:o.id, text:o.text, count:0}; });
-      votes.forEach(function(v){
-        if (v.champion!=null && champStats[v.champion]) champStats[v.champion].count++;
-      });
-      champStats.forEach(function(s){ s.pct = voterCount? Math.round(100*s.count/voterCount):0; });
-      champStats.sort(function(a,b){ return b.count-a.count; });
-      return { voterCount:voterCount, stats:champStats, kind:"bracket" };
-    }
-
-    if (poll.type==="tinder"){
-      var stats = opts.map(function(o){ return {id:o.id, text:o.text, yes:0, no:0}; });
-      votes.forEach(function(v){
-        opts.forEach(function(o){
-          var c = atIdx(v.choices, o.id);
-          var s = stats[o.id];
-          if (c==="yes") s.yes++; else if (c==="no") s.no++;
-        });
-      });
-      stats.forEach(function(s){ s.answered = s.yes+s.no; s.pct = s.answered? Math.round(100*s.yes/s.answered):0; });
-      stats.sort(function(a,b){ return b.yes-a.yes || b.pct-a.pct; });
-      return { voterCount:voterCount, stats:stats, kind:"tinder" };
-    }
-
-    var counts = opts.map(function(o){ return {id:o.id, text:o.text, count:0}; });
-    votes.forEach(function(v){
-      if (poll.type==="single"){
-        if (v.optionId!=null && counts[v.optionId]) counts[v.optionId].count++;
-      } else {
-        (v.optionIds||[]).forEach(function(id){ if (counts[id]) counts[id].count++; });
-      }
-    });
-    var maxCount = Math.max(1, Math.max.apply(null, counts.map(function(c){return c.count;}).concat([0])));
-    counts.forEach(function(c){ c.pct = voterCount? Math.round(100*c.count/voterCount):0; c.barPct = Math.round(100*c.count/maxCount); });
-    counts.sort(function(a,b){ return b.count-a.count; });
-    return { voterCount:voterCount, stats:counts, kind:poll.type, maxCount:maxCount };
-  }
-
-  function rankClass(i){ return i===0?"gold":i===1?"silver":i===2?"bronze":""; }
-
-  function renderLeaderboard(poll, results){
-    var html = '<div class="card">';
-    html += '<div class="results-summary"><h3 style="font-size:16px;font-weight:800;">📊 Leaderboard</h3>' +
-      '<span class="n">'+results.voterCount+' vote'+(results.voterCount===1?"":"s")+'</span></div>';
-
-    if (!results.stats.length || results.voterCount===0){
-      html += '<div class="empty-state"><div class="ic">🤷</div><p>No votes yet — be the first!</p></div>';
-    } else if (results.kind==="ranked"){
-      html += '<p style="font-size:11.5px;color:var(--text-faint);margin:-6px 0 14px;">Instant-runoff: lowest-ranked option is eliminated each round until one has a majority.</p>';
-      results.stats.forEach(function(s,i){
-        var tag = s.isWinner ? '🏆 Winner' : (s.eliminatedRound ? 'Eliminated round '+s.eliminatedRound : '');
-        html += '<div class="lb-item">' +
-          '<div class="lb-top"><div class="lb-rank '+rankClass(i)+'">'+(i+1)+'</div>' +
-          '<div class="lb-text">'+esc(s.text)+'</div>' +
-          '<div class="lb-stat">'+s.firstChoice+' 1st</div></div>' +
-          '<div class="lb-bar-track"><div class="lb-bar '+(i===0?'rank1':'')+'" style="width:'+s.pct+'%;"></div></div>' +
-          '<div class="lb-sub">'+(tag?esc(tag)+' · ':'')+s.pct+'% ranked #1</div>' +
-          '</div>';
-      });
-    } else if (results.kind==="rating"){
-      results.stats.forEach(function(s,i){
-        html += '<div class="lb-item">' +
-          '<div class="lb-top"><div class="lb-rank '+rankClass(i)+'">'+(i+1)+'</div>' +
-          '<div class="lb-text">'+esc(s.text)+'</div>' +
-          '<div class="lb-stat">'+(s.count? s.avg.toFixed(1):"—")+' ★</div></div>' +
-          '<div class="lb-bar-track"><div class="lb-bar '+(i===0?'rank1':'')+'" style="width:'+s.pct+'%;"></div></div>' +
-          '<div class="lb-sub">'+s.count+' rating'+(s.count===1?"":"s")+'</div>' +
-          '</div>';
-      });
-    } else if (results.kind==="bracket"){
-      html += '<p style="font-size:11.5px;color:var(--text-faint);margin:-6px 0 14px;">Each voter played their own head-to-head bracket — shown below is how often each option became their champion.</p>';
-      results.stats.forEach(function(s,i){
-        html += '<div class="lb-item">' +
-          '<div class="lb-top"><div class="lb-rank '+rankClass(i)+'">'+(i+1)+'</div>' +
-          '<div class="lb-text">'+(i===0 && s.count>0?'🏆 ':'')+esc(s.text)+'</div>' +
-          '<div class="lb-stat">'+s.count+'</div></div>' +
-          '<div class="lb-bar-track"><div class="lb-bar '+(i===0?'rank1':'')+'" style="width:'+s.pct+'%;"></div></div>' +
-          '<div class="lb-sub">'+s.pct+'% picked as champion</div>' +
-          '</div>';
-      });
-    } else if (results.kind==="tinder"){
-      results.stats.forEach(function(s,i){
-        var pct = s.answered? s.pct : 0;
-        html += '<div class="lb-item">' +
-          '<div class="lb-top"><div class="lb-rank '+rankClass(i)+'">'+(i+1)+'</div>' +
-          '<div class="lb-text">'+esc(s.text)+'</div>' +
-          '<div class="lb-stat" style="color:var(--yes);">👍 '+s.yes+'</div>' +
-          '<div class="lb-stat" style="color:var(--no);">👎 '+s.no+'</div></div>' +
-          '<div class="lb-bar-track"><div class="lb-bar '+(i===0?'rank1':'')+'" style="width:'+pct+'%;"></div></div>' +
-          '<div class="lb-sub">'+pct+'% yes ('+s.answered+' response'+(s.answered===1?"":"s")+')</div>' +
-          '</div>';
-      });
-    } else {
-      results.stats.forEach(function(s,i){
-        html += '<div class="lb-item">' +
-          '<div class="lb-top"><div class="lb-rank '+rankClass(i)+'">'+(i+1)+'</div>' +
-          '<div class="lb-text">'+esc(s.text)+'</div>' +
-          '<div class="lb-stat">'+s.count+'</div></div>' +
-          '<div class="lb-bar-track"><div class="lb-bar '+(i===0?'rank1':'')+'" style="width:'+s.barPct+'%;"></div></div>' +
-          '<div class="lb-sub">'+s.pct+'% of voters</div>' +
-          '</div>';
-      });
-    }
-    html += '</div>';
-    return html;
-  }
-
-  function renderPollUI(pollId, poll){
-    var isHost = hostKeyFor(pollId) && hostKeyFor(pollId)===poll.hostKey;
-    var voterName = nameFor(pollId);
-    var opts = optionsList(poll);
-    var results = computeResults(poll);
-    var voteKey = voterName ? normalizeName(voterName) : null;
-    var myVote = voteKey && poll.votes ? atIdx(poll.votes, voteKey) : null;
-    var isOpen = poll.status === "open";
-    var typeMeta = TYPE_META[poll.type] || TYPE_META.single;
-
-    var html = brandHtml();
-
-    /* header */
-    html += '<div class="poll-head"><div class="poll-name">'+esc(poll.name)+'</div><div class="badge-row">';
-    if (isOpen) html += '<span class="badge badge-open"><span class="badge-dot pulse"></span>Open</span>';
-    else html += '<span class="badge badge-closed"><span class="badge-dot"></span>Closed</span>';
-    html += '<span class="badge badge-muted">'+typeMeta.icon+' '+typeMeta.label+'</span>';
-    if (poll.anonymous) html += '<span class="badge badge-muted">🔒 Anonymous</span>';
-    if (isOpen && poll.autoCloseAt){
-      var rem = poll.autoCloseAt - Date.now();
-      html += '<span class="badge badge-muted">⏱ closes in '+fmtDuration(rem)+'</span>';
-    }
-    html += '</div></div>';
-
-    /* host panel */
-    if (isHost){
-      var shareUrl = pollUrl(pollId);
-      html += '<div class="card host-card">';
-      html += '<div class="section-label">👑 You created this poll</div>';
-      html += '<div class="link-box"><span class="url">'+esc(shareUrl)+'</span>' +
-        '<button class="btn btn-ghost btn-sm" onclick="Voter.copyLink(\''+pollId+'\')">Copy</button></div>';
-      html += '<div class="btn-row">';
-      if (isOpen) html += '<button class="btn btn-danger-outline btn-sm" style="flex:1;" onclick="Voter.closePoll(\''+pollId+'\')">End poll now</button>';
-      else html += '<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="Voter.reopenPoll(\''+pollId+'\')">Reopen poll</button>';
-      html += '<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="Voter.toggleVoterList()">'+(pageState.showVoters?"Hide":"Show")+' voters ('+results.voterCount+')</button>';
-      html += '</div>';
-      if (pageState.showVoters){
-        var voteEntries = toEntries(poll.votes);
-        html += '<div class="voter-list">';
-        if (!voteEntries.length){
-          html += '<div style="font-size:12.5px;color:var(--text-faint);padding-top:8px;">No one has voted yet.</div>';
-        } else if (poll.anonymous){
-          html += '<div style="font-size:12.5px;color:var(--text-faint);padding-top:8px;margin-bottom:8px;">🔒 Anonymous poll — individual choices are never shown, only who has voted.</div>';
-          voteEntries.forEach(function(e){
-            var v = e[1];
-            html += '<div class="voter-list-item"><span class="vname">'+esc(v.name||"Anonymous")+'</span><span class="vchoice">✓ voted</span></div>';
-          });
-        } else {
-          voteEntries.forEach(function(e){
-            var v = e[1];
-            var choiceText = "";
-            if (poll.type==="single"){ var o=opts[v.optionId]; choiceText = o?o.text:"—"; }
-            else if (poll.type==="multi"){ choiceText = (v.optionIds||[]).map(function(id){ var o=opts[id]; return o?o.text:"?"; }).join(", "); }
-            else if (poll.type==="ranked"){ choiceText = (v.ranking||[]).map(function(id){ var o=opts.filter(function(x){return x.id===Number(id);})[0]; return o?o.text:"?"; }).join(" › "); }
-            else if (poll.type==="rating"){ choiceText = opts.map(function(o){ var r=Number(atIdx(v.ratings,o.id)); return r>0 ? o.text+" ("+r+"★)" : null; }).filter(Boolean).join(", ") || "no ratings"; }
-            else if (poll.type==="bracket"){ var c=opts.filter(function(x){return x.id===v.champion;})[0]; choiceText = c ? "🏆 "+c.text : "—"; }
-            else { choiceText = opts.filter(function(o){ return atIdx(v.choices,o.id)==="yes"; }).map(function(o){return o.text;}).join(", ") || "no yes picks"; }
-            html += '<div class="voter-list-item"><span class="vname">'+esc(v.name||"Anonymous")+'</span><span class="vchoice">'+esc(choiceText)+'</span></div>';
-          });
-        }
-        html += '</div>';
-      }
-      html += '</div>';
-    }
-
-    /* name gate */
-    if (!voterName){
-      html += '<div class="card center">';
-      html += '<div class="avatar-big">👋</div>';
-      html += '<h2 style="font-size:19px;font-weight:800;margin-bottom:6px;">What\'s your name?</h2>';
-      html += '<p style="color:var(--text-dim);font-size:13.5px;margin-bottom:16px;">So we can record your vote.</p>';
-      html += '<input class="input" id="gate-name" placeholder="Your name" maxlength="60" style="text-align:center;margin-bottom:12px;" autofocus>';
-      html += '<button class="btn btn-primary" onclick="Voter.submitName(\''+pollId+'\')">Continue</button>';
-      html += '</div>';
-      app.innerHTML = html;
-      var gateInput = $("#gate-name");
-      if (gateInput) gateInput.addEventListener("keydown", function(e){ if (e.key==="Enter") window.Voter.submitName(pollId); });
-      return;
-    }
-    pageState.voterName = voterName;
-
-    var showVotingUI = isOpen && (!myVote || pageState.editing);
-    var canSeeResults = !poll.hideResults || !isOpen || isHost;
-
-    if (showVotingUI){
-      html += renderVotingUI(pollId, poll, opts, myVote);
-      if (poll.allowSuggestions) html += renderSuggestBox(pollId);
-    } else {
-      if (canSeeResults){
-        html += renderLeaderboard(poll, results);
-      } else {
-        html += '<div class="card center"><div class="avatar-big">🔒</div>' +
-          '<h2 style="font-size:17px;font-weight:800;margin-bottom:6px;">Results are hidden</h2>' +
-          '<p style="color:var(--text-dim);font-size:13.5px;">Your vote is in — the poll creator is keeping the leaderboard hidden until voting closes.</p></div>';
-      }
-      if (isOpen && myVote){
-        html += '<div class="change-vote-link" onclick="Voter.changeVote()">✏️ Change my vote</div>';
-      }
-      if (!isOpen && !myVote){
-        html += '<div class="empty-state" style="margin-top:-6px;"><p style="font-size:13px;">This poll is closed — voting has ended.</p></div>';
-      }
-      if (poll.allowSuggestions && isOpen) html += renderSuggestBox(pollId);
-    }
-
-    html += '<div class="footer-note">Voting as <b>'+esc(voterName)+'</b> · Voter</div>';
-    app.innerHTML = html;
-
-    if (poll.type==="tinder" && showVotingUI) initSwipeGestures(pollId, poll, opts, myVote);
-    var suggestInput = $("#suggest-input");
-    if (suggestInput) suggestInput.addEventListener("keydown", function(e){ if (e.key==="Enter") window.Voter.addSuggestion(pollId); });
-  }
-
-  function renderSuggestBox(pollId){
-    return '<div class="card">' +
-      '<div class="section-label">➕ Suggest an option</div>' +
-      '<div class="row"><input class="input" id="suggest-input" placeholder="Add a new option…" maxlength="200" style="flex:1;">' +
-      '<button class="btn btn-primary btn-sm" style="flex:none;" onclick="Voter.addSuggestion(\''+pollId+'\')">Add</button></div>' +
-      '</div>';
-  }
-
-  function renderVotingUI(pollId, poll, opts, myVote){
-    var html = '<div class="card">';
-    html += '<div class="section-label">'+(myVote?"Update your vote":"Cast your vote")+'</div>';
-
-    if (poll.type==="single"){
-      if (pageState.singlePick==null && myVote) pageState.singlePick = myVote.optionId;
-      opts.forEach(function(o){
-        var picked = pageState.singlePick===o.id;
-        html += '<div class="vote-opt radio'+(picked?' picked':'')+'" onclick="Voter.pickSingle('+o.id+')">' +
-          '<div class="indicator"><span class="dot"></span></div><div class="otext">'+esc(o.text)+'</div></div>';
-      });
-      html += '<button class="btn btn-primary" style="margin-top:8px;" '+(pageState.singlePick==null?'disabled':'')+' onclick="Voter.submitSingle(\''+pollId+'\')">Submit Vote</button>';
-
-    } else if (poll.type==="multi"){
-      if (!pageState.multiPick.length && myVote) pageState.multiPick = (myVote.optionIds||[]).slice();
-      opts.forEach(function(o){
-        var picked = pageState.multiPick.indexOf(o.id)>=0;
-        html += '<div class="vote-opt checkbox'+(picked?' picked':'')+'" onclick="Voter.toggleMulti('+o.id+')">' +
-          '<div class="indicator"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>' +
-          '<div class="otext">'+esc(o.text)+'</div></div>';
-      });
-      html += '<button class="btn btn-primary" style="margin-top:8px;" '+(pageState.multiPick.length?'':'disabled')+' onclick="Voter.submitMulti(\''+pollId+'\')">Submit Vote</button>';
-
-    } else if (poll.type==="ranked"){
-      if (!pageState.rankedOrder.length){
-        pageState.rankedOrder = myVote && myVote.ranking ? myVote.ranking.slice() : opts.map(function(o){ return o.id; });
-      }
-      opts.forEach(function(o){ if (pageState.rankedOrder.indexOf(o.id)===-1) pageState.rankedOrder.push(o.id); });
-      pageState.rankedOrder = pageState.rankedOrder.filter(function(id){ return opts.some(function(o){ return o.id===id; }); });
-
-      html += '<p style="font-size:12.5px;color:var(--text-dim);margin-bottom:12px;">No dragging needed — use the arrows to put your favorite on top.</p>';
-      pageState.rankedOrder.forEach(function(id,i){
-        var o = opts.filter(function(x){ return x.id===id; })[0];
-        if (!o) return;
-        html += '<div class="rank-row"><div class="lb-rank '+rankClass(i)+'">'+(i+1)+'</div>' +
-          '<div class="otext" style="flex:1;">'+esc(o.text)+'</div>' +
-          '<div class="rank-arrows">' +
-          '<button type="button" class="rank-arrow" '+(i===0?'disabled':'')+' onclick="Voter.moveRank('+i+',-1)">▲</button>' +
-          '<button type="button" class="rank-arrow" '+(i===pageState.rankedOrder.length-1?'disabled':'')+' onclick="Voter.moveRank('+i+',1)">▼</button>' +
-          '</div></div>';
-      });
-      html += '<button class="btn btn-primary" style="margin-top:8px;" onclick="Voter.submitRanking(\''+pollId+'\')">Submit Ranking</button>';
-
-    } else if (poll.type==="rating"){
-      if (!Object.keys(pageState.ratingPick).length && myVote && myVote.ratings){
-        opts.forEach(function(o){ var r=Number(atIdx(myVote.ratings,o.id)); if (r>0) pageState.ratingPick[o.id]=r; });
-      }
-      opts.forEach(function(o){
-        var r = pageState.ratingPick[o.id]||0;
-        html += '<div class="rank-row"><div class="otext" style="flex:1;">'+esc(o.text)+'</div><div class="stars">';
-        for (var i=1;i<=5;i++){
-          html += '<button type="button" class="star-btn'+(i<=r?' filled':'')+'" onclick="Voter.setRating('+o.id+','+i+')">★</button>';
-        }
-        html += '</div></div>';
-      });
-      var anyRated = Object.keys(pageState.ratingPick).some(function(k){ return pageState.ratingPick[k]>0; });
-      html += '<button class="btn btn-primary" style="margin-top:8px;" '+(anyRated?'':'disabled')+' onclick="Voter.submitRating(\''+pollId+'\')">Submit Ratings</button>';
-
-    } else if (poll.type==="bracket"){
-      if (!pageState.bracket){
-        pageState.bracket = { roundIds: opts.map(function(o){ return o.id; }), matchIndex:0, nextRoundIds:[], champion:null, roundNum:1, history:[] };
-      }
-      var br = pageState.bracket;
-      var match = br.champion==null ? getCurrentMatch(br) : null;
-      if (match){
-        var ma = opts.filter(function(x){ return x.id===match[0]; })[0];
-        var mb = opts.filter(function(x){ return x.id===match[1]; })[0];
-        html += '<div class="badge badge-muted" style="margin-bottom:14px;">Round '+br.roundNum+'</div>';
-        html += '<div class="bracket-vs">' +
-          '<button type="button" class="bracket-card" onclick="Voter.pickBracket(\''+pollId+'\','+match[0]+','+match[1]+')">'+esc(ma?ma.text:"?")+'</button>' +
-          '<div class="bracket-vs-label">VS</div>' +
-          '<button type="button" class="bracket-card" onclick="Voter.pickBracket(\''+pollId+'\','+match[1]+','+match[0]+')">'+esc(mb?mb.text:"?")+'</button>' +
-          '</div>';
-      } else if (br.champion!=null){
-        var champ = opts.filter(function(x){ return x.id===br.champion; })[0];
-        html += '<div class="center" style="padding:6px 0 4px;">' +
-          '<div style="font-size:34px;">🏆</div>' +
-          '<div style="font-size:12px;color:var(--text-faint);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin:8px 0 4px;">Your champion</div>' +
-          '<div style="font-size:20px;font-weight:800;margin-bottom:16px;">'+esc(champ?champ.text:"?")+'</div>' +
-          '</div>' +
-          '<button class="btn btn-primary" onclick="Voter.submitBracket(\''+pollId+'\')">Submit Bracket</button>';
-      }
-
-    } else {
-      if (myVote && !Object.keys(pageState.tinderChoices).length && pageState.tinderIndex===0){
-        opts.forEach(function(o){ var c=atIdx(myVote.choices,o.id); if(c) pageState.tinderChoices[o.id]=c; });
-      }
-      var total = opts.length;
-      var idx = pageState.tinderIndex;
-      var pct = total? Math.round(100*idx/total):0;
-      html += '<div class="swipe-progress"><div class="swipe-progress-bar" style="width:'+pct+'%;"></div></div>';
-      html += '<div class="swipe-wrap" id="swipe-wrap">';
-      if (idx < total){
-        var next = opts[idx+1];
-        if (next) html += '<div class="swipe-card" style="transform:scale(.94) translateY(10px);opacity:.5;z-index:1;">' +
-          '<div class="num">'+(idx+2)+' / '+total+'</div>'+esc(next.text)+'</div>';
-        var cur = opts[idx];
-        html += '<div class="swipe-card" id="swipe-top" style="z-index:2;">' +
-          '<div class="num">'+(idx+1)+' / '+total+'</div>' +
-          '<div class="swipe-stamp stamp-yes" id="stamp-yes">YES</div>' +
-          '<div class="swipe-stamp stamp-no" id="stamp-no">NO</div>' +
-          esc(cur.text) + '</div>';
-      } else {
-        html += '<div class="swipe-card" style="z-index:2;"><div>✅ All done!<div style="font-size:13px;font-weight:500;color:var(--text-dim);margin-top:8px;">Submitting your votes…</div></div></div>';
-      }
-      html += '</div>';
-      if (idx < total){
-        html += '<div class="swipe-actions">' +
-          '<button class="swipe-btn no" onclick="Voter.swipeAnswer(\''+pollId+'\',\'no\')">✕</button>' +
-          '<button class="swipe-btn yes" onclick="Voter.swipeAnswer(\''+pollId+'\',\'yes\')">♥</button>' +
-          '</div>';
-        html += '<div class="swipe-hint">Drag the card, or tap ✕ / ♥</div>';
-        if (idx>0) html += '<button class="swipe-undo" onclick="Voter.swipeUndo()">↺ Undo last</button>';
-      }
-    }
-    html += '</div>';
-    return html;
-  }
-
-  function handleSwipe(pollId, answer){
-    pageState.tinderChoices[pageState.tinderIndex] = answer;
-    pageState.tinderIndex++;
-    var total = currentPoll ? optionsList(currentPoll).length : 0;
-    if (pageState.tinderIndex>=total){
-      writeVote(pollId, { name: pageState.voterName, type:"tinder", choices: pageState.tinderChoices, votedAt: ServerTS });
-    }
-    renderPollPage.current && renderPollPage.current();
-  }
-
-  function initSwipeGestures(pollId, poll, opts, myVote){
-    var card = $("#swipe-top");
-    if (!card) return;
-    var startX=0, startY=0, curX=0, dragging=false;
-    var stampYes = $("#stamp-yes"), stampNo = $("#stamp-no");
-
-    function onDown(e){
-      dragging=true;
-      startX=e.clientX; startY=e.clientY; curX=0;
-      card.style.transition="none";
-      try{ card.setPointerCapture(e.pointerId); }catch(err){}
-    }
-    function onMove(e){
-      if (!dragging) return;
-      curX = e.clientX-startX;
-      var curY = (e.clientY-startY)*0.15;
-      var rot = curX/18;
-      card.style.transform = "translate("+curX+"px,"+curY+"px) rotate("+rot+"deg)";
-      if (stampYes) stampYes.style.opacity = curX>18 ? Math.min(1,curX/100) : 0;
-      if (stampNo) stampNo.style.opacity = curX<-18 ? Math.min(1,-curX/100) : 0;
-    }
-    function onUp(){
-      if (!dragging) return;
-      dragging=false;
-      card.style.transition="transform .3s cubic-bezier(.22,1,.36,1)";
-      var THRESH=90;
-      if (curX>THRESH){
-        card.style.transform="translate(500px,-40px) rotate(25deg)"; card.style.opacity=0;
-        setTimeout(function(){ handleSwipe(pollId,"yes"); },160);
-      } else if (curX<-THRESH){
-        card.style.transform="translate(-500px,-40px) rotate(-25deg)"; card.style.opacity=0;
-        setTimeout(function(){ handleSwipe(pollId,"no"); },160);
-      } else {
-        card.style.transform="translate(0,0) rotate(0)";
-        if (stampYes) stampYes.style.opacity=0;
-        if (stampNo) stampNo.style.opacity=0;
-      }
-    }
-    card.addEventListener("pointerdown", onDown);
-    card.addEventListener("pointermove", onMove);
-    card.addEventListener("pointerup", onUp);
-    card.addEventListener("pointercancel", onUp);
-  }
-
-  route();
-})();
-</script>
+  <div class="page">
+    <div class="masthead">
+      <img class="masthead-logo" src="Tj-Vining.png" alt="TJ Vining, ACD / Art Director">
+      <span>Index</span>
+    </div>
+
+    <a class="portfolio-hero" href="https://tjvining.com" target="_blank" rel="noopener">
+      <div class="portfolio-frame">
+        <iframe src="https://tjvining.com" tabindex="-1" aria-hidden="true" loading="lazy"></iframe>
+      </div>
+      <div class="portfolio-cta">
+        <div class="portfolio-cta-text">
+          <span class="portfolio-title">Looking for my portfolio?</span>
+          <span class="portfolio-eyebrow">Click to continue</span>
+        </div>
+        <span class="portfolio-arrow">↗</span>
+      </div>
+    </a>
+
+    <div class="heading-row">
+      <h1>Toolbox<span class="dot">.</span></h1>
+      <p class="lede">A small collection of things I've built.</p>
+    </div>
+
+    <nav class="index">
+      <div class="group-label">Travel Planners</div>
+      <a class="row" href="https://scotland.tjvining.com" target="_blank" rel="noopener">
+        <span class="row-index">01</span>
+        <span class="row-info">
+          <span class="row-title">Scotland Trip Planner</span>
+          <span class="row-url">scotland.tjvining.com</span>
+        </span>
+        <span class="row-arrow">→</span>
+      </a>
+      <a class="row" href="https://skitrip.tjvining.com" target="_blank" rel="noopener">
+        <span class="row-index">02</span>
+        <span class="row-info">
+          <span class="row-title">Ski Trip Planner</span>
+          <span class="row-url">skitrip.tjvining.com</span>
+        </span>
+        <span class="row-arrow">→</span>
+      </a>
+
+      <div class="group-label">Other Tools</div>
+      <a class="row" href="https://voter.tjvining.com" target="_blank" rel="noopener">
+        <span class="row-index">03</span>
+        <span class="row-info">
+          <span class="row-title">Voter</span>
+          <span class="row-url">voter.tjvining.com</span>
+        </span>
+        <span class="row-arrow">→</span>
+      </a>
+      <div class="row row-disabled">
+        <span class="row-index">04</span>
+        <span class="row-info">
+          <span class="row-title">Texas Dive Bar Passport</span>
+          <span class="row-url">passport.tjvining.com</span>
+        </span>
+        <span class="row-arrow">→</span>
+        <span class="row-tooltip">Coming soon</span>
+      </div>
+    </nav>
+
+    <footer>tools.tjvining.com</footer>
+  </div>
 </body>
 </html>
