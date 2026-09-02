@@ -364,6 +364,26 @@
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
 
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(10,6,22,.68);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;z-index:1000;
+    padding:20px;opacity:0;pointer-events:none;transition:opacity .15s;
+  }
+  .modal-overlay.show{opacity:1;pointer-events:auto;}
+  .modal-card{
+    background:var(--surface-solid);border:1px solid var(--border-soft);border-radius:var(--radius);
+    padding:26px 24px;max-width:380px;width:100%;box-shadow:var(--shadow);
+    transform:scale(.95) translateY(8px);transition:transform .15s;
+  }
+  .modal-overlay.show .modal-card{transform:scale(1) translateY(0);}
+  .modal-icon{font-size:32px;text-align:center;margin-bottom:12px;}
+  .modal-title{font-size:17px;font-weight:800;text-align:center;margin-bottom:8px;}
+  .modal-message{font-size:14px;color:var(--text-dim);text-align:center;line-height:1.5;margin-bottom:22px;white-space:pre-line;}
+  .modal-actions{display:flex;gap:10px;}
+  .modal-actions .btn{flex:1;}
+  .btn-danger{background:linear-gradient(135deg,#f43f5e,#dc2626);color:#fff;box-shadow:0 10px 25px -8px #f43f5e99;}
+  .btn-danger:hover{filter:brightness(1.08);}
+
   .footer-note{text-align:center;color:var(--text-faint);font-size:11.5px;margin-top:26px;line-height:1.6;}
   .change-vote-link{
     text-align:center;margin-top:16px;font-size:13px;font-weight:700;color:#c9b8ff;cursor:pointer;user-select:none;
@@ -373,6 +393,7 @@
 <body>
 <div id="app"></div>
 <div id="toast" class="toast"></div>
+<div id="modal-root"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
@@ -458,6 +479,37 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function(){ el.classList.remove("show"); }, 2200);
   }
+  function showConfirm(opts){
+    return new Promise(function(resolve){
+      var root = $("#modal-root");
+      var confirmClass = opts.danger ? "btn-danger" : "btn-primary";
+      root.innerHTML =
+        '<div class="modal-overlay" id="modal-overlay">' +
+          '<div class="modal-card">' +
+            (opts.icon ? '<div class="modal-icon">'+opts.icon+'</div>' : '') +
+            '<div class="modal-title">'+esc(opts.title||"")+'</div>' +
+            '<div class="modal-message">'+esc(opts.message||"")+'</div>' +
+            '<div class="modal-actions">' +
+              '<button type="button" class="btn btn-ghost" id="modal-cancel">'+esc(opts.cancelLabel||"Cancel")+'</button>' +
+              '<button type="button" class="btn '+confirmClass+'" id="modal-confirm">'+esc(opts.confirmLabel||"OK")+'</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      requestAnimationFrame(function(){ var ov=$("#modal-overlay"); if (ov) ov.classList.add("show"); });
+
+      function onKey(e){ if (e.key==="Escape") finish(false); }
+      function finish(result){
+        document.removeEventListener("keydown", onKey);
+        root.innerHTML = "";
+        resolve(result);
+      }
+      document.addEventListener("keydown", onKey);
+      $("#modal-confirm").onclick = function(){ finish(true); };
+      $("#modal-cancel").onclick = function(){ finish(false); };
+      $("#modal-overlay").onclick = function(e){ if (e.target.id==="modal-overlay") finish(false); };
+    });
+  }
+
   function copyText(text){
     if (navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(text).then(function(){ toast("Link copied!"); }, function(){ fallbackCopy(text); });
@@ -686,11 +738,22 @@
       var key = normalizeName(v);
       var existing = currentPoll && currentPoll.votes ? atIdx(currentPoll.votes, key) : null;
       if (existing && existing.name){
-        var isMe = confirm('Someone named "'+existing.name+'" has already voted in this poll.\n\nIs that you?\n\nOK = yes, it\'s me (I can update my vote)\nCancel = no, that\'s someone else');
-        if (!isMe){
-          v = uniqueName(v, currentPoll.votes);
-          toast('You\'re set up as "'+v+'" since that name was taken.');
-        }
+        showConfirm({
+          icon: "🤔",
+          title: "Is that you?",
+          message: '"'+existing.name+'" has already voted in this poll. Confirm it\'s you if you want to update your vote.',
+          confirmLabel: "Yes, that's me",
+          cancelLabel: "No, someone else"
+        }).then(function(isMe){
+          var finalName = v;
+          if (!isMe){
+            finalName = uniqueName(v, currentPoll.votes);
+            toast('You\'re set up as "'+finalName+'" since that name was taken.');
+          }
+          setNameFor(pollId, finalName);
+          renderPollPage.current && renderPollPage.current();
+        });
+        return;
       }
       setNameFor(pollId, v);
       renderPollPage.current && renderPollPage.current();
@@ -789,8 +852,16 @@
     },
 
     closePoll: function(pollId){
-      if (!confirm("Close this poll now? People won't be able to vote anymore.")) return;
-      db.ref(NS+"/polls/"+pollId+"/status").set("closed");
+      showConfirm({
+        icon: "🔒",
+        title: "Close this poll?",
+        message: "People won't be able to vote anymore. You can reopen it later if you change your mind.",
+        confirmLabel: "End poll now",
+        cancelLabel: "Cancel",
+        danger: true
+      }).then(function(ok){
+        if (ok) db.ref(NS+"/polls/"+pollId+"/status").set("closed");
+      });
     },
     reopenPoll: function(pollId){
       db.ref(NS+"/polls/"+pollId+"/status").set("open");
