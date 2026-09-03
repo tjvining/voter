@@ -568,6 +568,25 @@
   }
   window.addEventListener("hashchange", route);
 
+  function isOnHome(){
+    var h = location.hash.replace(/^#\/?/, "");
+    return !h.match(/^poll\//);
+  }
+  var pollStatusCache = {};
+  function fetchPollStatuses(ids){
+    ids.forEach(function(id){
+      if (pollStatusCache[id] !== undefined) return;
+      pollStatusCache[id] = "loading";
+      db.ref(NS+"/polls/"+id+"/status").once("value").then(function(snap){
+        pollStatusCache[id] = snap.val() || "unavailable";
+        if (isOnHome()) renderHome();
+      }).catch(function(){
+        pollStatusCache[id] = "unavailable";
+        if (isOnHome()) renderHome();
+      });
+    });
+  }
+
   function goHome(){ location.hash = "#/"; }
   function pollUrl(pollId){ return location.origin + "/#/poll/" + pollId; }
   function pollShareText(pollId, pollName){
@@ -647,11 +666,19 @@
     html += '</div>'; // card
 
     if (polls.length){
+      var recentIds = polls.slice(0,8).map(function(p){ return p.id; });
+      fetchPollStatuses(recentIds);
       html += '<div class="section-label" style="margin:26px 0 10px;">Your recent polls</div>';
       polls.slice(0,8).forEach(function(p){
         var m = TYPE_META[p.type] || TYPE_META.single;
+        var status = pollStatusCache[p.id];
+        var statusBadge = "";
+        if (status==="open") statusBadge = '<span class="badge badge-open" style="flex-shrink:0;"><span class="badge-dot pulse"></span>Open</span>';
+        else if (status==="closed") statusBadge = '<span class="badge badge-closed" style="flex-shrink:0;">Closed</span>';
+        else if (status==="unavailable") statusBadge = '<span class="badge badge-muted" style="flex-shrink:0;">Not found</span>';
         html += '<div class="link-item" onclick="location.hash=\'#/poll/'+p.id+'\'">' +
           '<div class="lmain"><div class="lname">'+esc(p.name||"Untitled poll")+'</div><div class="lmeta">'+m.icon+' '+m.label+' · '+fmtWhen(p.createdAt)+'</div></div>' +
+          statusBadge +
           '<button type="button" class="link-del" title="Remove from history" onclick="event.stopPropagation();Voter.deleteMyPoll(\''+p.id+'\')">✕</button>' +
           '<div class="arrow">›</div></div>';
       });
